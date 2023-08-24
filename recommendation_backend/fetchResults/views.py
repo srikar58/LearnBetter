@@ -1,0 +1,21 @@
+from django.shortcuts import render
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from .filterResults import process_filter
+import json
+from bson import json_util
+# Create your views here.
+
+@csrf_exempt
+def filter_results_api(request):
+    if request.method == 'POST':
+        search_word = request.POST.get('search_term','')
+
+        result = process_filter(search_word)
+
+        # print(type(result[0]))
+
+        searialised_result = json.loads(json_util.dumps(result))
+        return JsonResponse(searialised_result,safe=False)
+    else:
+        return JsonResponse({'error':'Invalid request method'})
