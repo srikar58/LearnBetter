@@ -8,8 +8,9 @@ from bson import json_util
 
 @csrf_exempt
 def filter_results_api(request):
-    if request.method == 'POST':
-        search_word = request.POST.get('search_term','')
+    if request.method == 'GET':
+        print(request.GET)
+        search_word = request.GET.get('search_term')
 
         result = process_filter(search_word)
 
