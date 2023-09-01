@@ -1,5 +1,5 @@
 import Home from "./components/Home";
-import Results from "./components/Results";
+import ResultsPage from "./components/ResultsPage";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 
 export default function App(): JSX.Element {
@@ -9,7 +9,7 @@ export default function App(): JSX.Element {
         <div>
           <Routes>
             <Route path="/" element={<Home />} />
-            <Route path="/results/:term" element={<Results />} />
+            <Route path="/results/:term" element={<ResultsPage />} />
           </Routes>
         </div>
       </div>

@@ -92,6 +92,17 @@ h1{
   box-shadow: 3px 3px 6px rgba(0, 0, 0, 0.2);
 }
 
+.result h2{
+  margin-bottom: 16px;
+  /* text-decoration: underline;
+  text-decoration-color: #1976d2;
+  text-decoration-thickness: 4px; */
+}
+
+.satisfactoryButtons{
+  margin-top: 16px;
+}
+
 .result h3{
   color: #888;
   font-size: 28px;
@@ -124,4 +135,10 @@ h1{
 
 .subtopic{
   font-weight: 700;
+}
+
+.resultsSection{
+  max-width: 90%;
+  margin-right: 5%;
+  margin-left: 5%;
 }
