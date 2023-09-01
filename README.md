@@ -4,6 +4,8 @@
       1. Python
       2. MongoDB
       3. Postman
+      4. Node JS
+      5. NPM
 
 ## Quick Start
 
@@ -30,15 +32,20 @@
     pip3 install -r requirements.txt
 
 
-### Populate Database
+#### 5. Populate Database
 ###### 1. Locate the file populate.py
 ###### 2. Run the following command
     python3 populate.py <excel_file_location>
 
-### Run the django project
+#### 6. Run the django project
 ###### 1. Make sure you are in the root directory of the backend project(where you locate manage.py)
 ###### 2. Run the following command
     python3 manage.py runserver
+
+#### 7. Run the Frontend application
+      cd recommendation_frontend
+      npm install
+      npm start
 
 ## APIs available
 ### 1. Filtering articles
