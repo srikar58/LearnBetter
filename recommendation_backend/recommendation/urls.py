@@ -18,8 +18,15 @@ from django.contrib import admin
 from django.urls import path
 from testDb import views
 import fetchResults.views
+from recommenderService import views as recommender_viewes
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('test-mongoengine/', views.test_mongoengine_connection, name='test_mongoengine'),
-    path('filter_results/', fetchResults.views.filter_results_api, name='filter_results'),
+    path('test-mongoengine/', views.test_mongoengine_connection,
+         name='test_mongoengine'),
+    path('filter_results/', fetchResults.views.filter_results_api,
+         name='filter_results'),
+    path('get_recommendation/',
+         recommender_viewes.get_recommendation_api, name='process_recommendation'),
+    path('process_activity/',
+         recommender_viewes.post_activity_api, name='process_activity'),
 ]

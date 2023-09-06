@@ -6,6 +6,7 @@ import json
 from bson import json_util
 # Create your views here.
 
+
 @csrf_exempt
 def filter_results_api(request):
     if request.method == 'GET':
@@ -16,7 +17,7 @@ def filter_results_api(request):
 
         # print(type(result[0]))
 
-        searialised_result = json.loads(json_util.dumps(result))
-        return JsonResponse(searialised_result,safe=False)
+        serialised_result = json.loads(json_util.dumps(result))
+        return JsonResponse(serialised_result, safe=False)
     else:
-        return JsonResponse({'error':'Invalid request method'})
+        return JsonResponse({'error': 'Invalid request method'})
