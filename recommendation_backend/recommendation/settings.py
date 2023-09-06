@@ -39,6 +39,7 @@ DEBUG = True
 # Application definition
 
 INSTALLED_APPS = [
+    'recommenderService',
     'fetchResults',
     'mongoengine',
     'testDb',
