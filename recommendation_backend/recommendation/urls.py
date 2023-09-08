@@ -29,4 +29,5 @@ urlpatterns = [
          recommender_viewes.get_recommendation_api, name='process_recommendation'),
     path('process_activity/',
          recommender_viewes.post_activity_api, name='process_activity'),
+    path('get_page/', fetchResults.views.fetch_result_api, name='fetch_a_page')
 ]

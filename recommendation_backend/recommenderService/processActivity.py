@@ -4,6 +4,7 @@ import mongoengine
 
 
 def process_activity(user_name, search_term, page_accessed):
+    search_term = search_term.lower()
     search_word_array = search_term.lower().split()  # Convert search terms to array
     page_document = ResultsModels.DataDocument.objects.get(ID=page_accessed)
     try:
@@ -53,7 +54,7 @@ def level_calc(Category_A, Category_B):
     if (Category_A == "Basic"):
         level1 = 0
     else:
-        level1 = int(Category_A.split("Level")[1])
+        level1 = int(Category_A.split(" ")[1])
 
     level2 = Category_B
 

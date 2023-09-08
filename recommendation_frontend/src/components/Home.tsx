@@ -15,7 +15,7 @@ export default function Home(): JSX.Element {
   };
   return (
     <>
-      <div className="App">
+      <div className="Home">
         <header>
           <h1>Learn Better</h1>
           <form className="search-box" onSubmit={handleSearch}>

@@ -23,6 +23,9 @@ CORS_ORIGIN_WHITELIST = (
     'http://localhost:3000',
 )
 
+CORS_ALLOW_ALL_ORIGINS = False
+
+CORS_ALLOW_HEADERS = ['username']
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/

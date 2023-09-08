@@ -35,7 +35,7 @@ def post_activity_api(request):
         print(user_name)
         print(page_accessed)
 
-        result = process_activity(user_name, search_word, page_accessed)
+        result = process_activity(user_name, search_word, int(page_accessed))
 
         # print(type(result[0]))
 

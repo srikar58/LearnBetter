@@ -9,6 +9,7 @@ class Recommendations(mongoengine.Document):
     Recommendation = mongoengine.ReferenceField(resultsModels.DataDocument)
     Feedback = mongoengine.IntField()
     TimeStamp = mongoengine.DateTimeField()
+    RecommendationLevel = mongoengine.StringField
 
 
 class UserActivity(mongoengine.EmbeddedDocument):
@@ -17,6 +18,7 @@ class UserActivity(mongoengine.EmbeddedDocument):
     PagesAccessed = mongoengine.ListField(
         mongoengine.ReferenceField(resultsModels.DataDocument))
     Level = mongoengine.StringField()
+    ActiveRecommendation = mongoengine.ReferenceField(Recommendations)
 
 
 class User(mongoengine.Document):
