@@ -25,19 +25,22 @@ def process_recommendation(user_name, search_term):
     matched_activity = None
     for activity in matching_activities:
         categories = next_level(activity.Level, 0)
+        # print(activity.Topic, categories[0], categories[1])
         data_document = ResultsModels.DataDocument.objects(
-            Q(Category_A=categories[0]) & Q(Category_B=categories[1])).first()
+            Q(Topic__icontains=activity.Topic) & Q(Category_A=categories[0]) & Q(Category_B=categories[1])).first()
         if data_document is None:
+            print("------------------This block is running")
             categories = next_level(activity.Level, 1)
+            print(activity.Topic, categories[0], categories[1])
             data_document = ResultsModels.DataDocument.objects(
-                Q(Category_A=categories[0]) & Q(Category_B=categories[1])).first()
+                Q(Topic__icontains=activity.Topic) & Q(Category_A=categories[0]) & Q(Category_B=categories[1])).first()
             matched_activity = activity
         else:
             matched_activity = activity
             break
 
     # reccomendation = Recommendations(SearchTerm, )
-    if matched_activity is not None:
+    if matched_activity is not None and data_document is not None:
 
         if matched_activity.ActiveRecommendation is not None and matched_activity.ActiveRecommendation.Recommendation == data_document:
             print("-------------------Duplicate Recommendation-----------------")
@@ -68,10 +71,10 @@ def next_level(level, step):
         return [catergories[0], str(int(catergories[1])+1)]
     if (step == 1):
         if "Basic" in catergories[0]:
-            return ["Level1", '1']
+            return ["Level 1", '1']
         else:
-            category_a = int(catergories[0].split("vel")[1])
-            return ["Level"+str(category_a+1), '1']
+            category_a = int(catergories[0].split(" ")[1])
+            return ["Level "+str(category_a+1), '1']
 
 
 def save_recommendation_to_db(search_term, data_document):
