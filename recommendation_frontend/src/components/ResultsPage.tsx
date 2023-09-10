@@ -14,34 +14,57 @@ interface SearchResult {
 }
 
 interface Recommendation {
-  Topic: string;
-  Summary: string;
-  Content: string;
-  Link: string;
-  SubTopic: string;
-  ID: number;
+  document: {
+    Topic: string;
+    Summary: string;
+    Content: string;
+    Link: string;
+    SubTopic: string;
+    ID: number;
+  };
+  recommendation_obj: {
+    _id: {
+      $oid: string;
+    };
+    SearchTerm: string;
+    PredictedKnowledge: number;
+  };
+  Status: boolean;
 }
-
 function ResultsPage(): JSX.Element {
   const { term } = useParams<{ term: string }>();
   const [searchTerm, setSearchTerm] = useState(term);
   const [results, setResults] = useState<SearchResult[]>([]);
   const [recommendation, setRecommendation] = useState<Recommendation>({
-    Topic: "",
-    Summary: "",
-    Content: "",
-    Link: "",
-    SubTopic: "",
-    ID: 0,
+    document: {
+      Topic: "",
+      Summary: "",
+      Content: "",
+      Link: "",
+      SubTopic: "",
+      ID: -1,
+    },
+    recommendation_obj: {
+      _id: {
+        $oid: "",
+      },
+      SearchTerm: "",
+      PredictedKnowledge: -1,
+    },
+    Status: false,
   });
   const [recommendationExist, setRecommendationExist] = useState<Boolean>();
 
   const navigate = useNavigate();
 
+  const [username, setUsername] = useState<string | null>(
+    localStorage.getItem("username")
+  );
+
   useEffect(() => {
     const fetchResults = async () => {
+      const headers = { Username: String(username) };
       try {
-        const headers = { Username: "srikar" };
         const endpoint = `http://127.0.0.1:8000/filter_results/?search_term=${searchTerm}`;
 
         const response = await fetch(endpoint, { headers });
@@ -54,7 +77,7 @@ function ResultsPage(): JSX.Element {
         setResults(json_response.results);
         console.log(json_response.recommendation);
         if (json_response.recommendation.Status) {
-          setRecommendation(json_response.recommendation.document);
+          setRecommendation(json_response.recommendation);
         } else {
           setRecommendationExist(false);
         }
@@ -74,8 +97,8 @@ function ResultsPage(): JSX.Element {
   };
 
   const handleReadMore = async (resultID: number) => {
+    const headers = { Username: String(username) };
     try {
-      const headers = { Username: "srikar" };
       const formData = new FormData();
 
       formData.append("search_term", String(searchTerm));
@@ -133,22 +156,39 @@ function ResultsPage(): JSX.Element {
                 </div>
               ))}
           </Grid>
-          <Grid item xs={4} className="results">
-            <div className="result">
-              <h2>Recommended for you</h2>
-              <h3>{recommendation.Topic}</h3>
-              <p className="subtopic">{recommendation.SubTopic}</p>
-              <p
-                dangerouslySetInnerHTML={{ __html: recommendation.Summary }}
-              ></p>
-              <a
-                target="_blank"
-                rel="nofollow"
-                onClick={() => handleReadMore(recommendation.ID)}
+          <Grid item xs={4}>
+            <div className="recommendation">
+              <div
+                style={{
+                  maxWidth: "90%",
+                  marginLeft: "5%",
+                  marginRight: "5%",
+                  boxSizing: "border-box",
+                  alignItems: "center",
+                  padding: "4%", // Add padding for spacing within the border
+                }}
               >
-                Read More
-              </a>
-              <RatingScale />
+                <h2 style={{ marginBottom: "16px" }}>Recommended for you</h2>
+                <div className="result">
+                  <h3>{recommendation.document.Topic}</h3>
+                  <p className="subtopic">{recommendation.document.SubTopic}</p>
+                  <p
+                    dangerouslySetInnerHTML={{
+                      __html: recommendation.document.Summary,
+                    }}
+                  ></p>
+                  <a
+                    target="_blank"
+                    rel="nofollow"
+                    onClick={() => handleReadMore(recommendation.document.ID)}
+                  >
+                    Read More
+                  </a>
+                </div>
+                <RatingScale
+                  recommendationObj={recommendation.recommendation_obj}
+                />
+              </div>
             </div>
           </Grid>
         </Grid>
