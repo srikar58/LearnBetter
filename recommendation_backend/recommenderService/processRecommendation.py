@@ -14,7 +14,6 @@ def process_recommendation(user_name, search_term):
     except:
         return {"Status": False}
     print(user_document.UserName)
-    highest_level = -1
 
     matching_activities = [
         activity for activity in user_document.Activity if search_term in activity.SearchTerms]
@@ -39,6 +38,7 @@ def process_recommendation(user_name, search_term):
             matched_activity = activity
             break
 
+    # process_knowledge_level(matched_activity)
     # reccomendation = Recommendations(SearchTerm, )
     if matched_activity is not None and data_document is not None:
 
@@ -47,8 +47,9 @@ def process_recommendation(user_name, search_term):
             return {"document": data_document.to_mongo().to_dict(),
                     "recommendation_obj": matched_activity.ActiveRecommendation.to_mongo().to_dict(), "Status": True}
         else:
+            knowledge_level = process_knowledge_level(matched_activity)
             recommendation = save_recommendation_to_db(
-                search_term, data_document)
+                search_term, data_document, knowledge_level)
             matched_activity.ActiveRecommendation = recommendation
             user_document.RecommendationsFeed.append(recommendation)
             user_document.save()
@@ -77,10 +78,28 @@ def next_level(level, step):
             return ["Level "+str(category_a+1), '1']
 
 
-def save_recommendation_to_db(search_term, data_document):
+def save_recommendation_to_db(search_term, data_document, knowledge_level):
     est_offset = timedelta(hours=-4)
     recommendation = Recommendations(
-        SearchTerm=search_term, Recommendation=data_document, TimeStamp=datetime.now(timezone(est_offset)))
+        SearchTerm=search_term, Recommendation=data_document, PredictedKnowledge=knowledge_level, TimeStamp=datetime.now(timezone(est_offset)))
 
     recommendation.save()
     return recommendation
+
+
+def process_knowledge_level(activity):
+    pages = len(set(activity.PagesAccessed))
+    total_pages = ResultsModels.DataDocument.objects(
+        Topic=activity.Topic).count()
+    print("No of unique pages accessed in this topic is ", pages)
+    if pages == 0:
+        return 0
+    elif pages == 1:
+        return 2
+    elif pages == 2:
+        return 3
+    elif pages > 2 and pages < total_pages:
+        return 4
+    else:
+        return 5
+    # print("No of unique pages accessed in this topic is ", pages)

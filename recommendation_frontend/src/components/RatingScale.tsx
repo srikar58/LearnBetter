@@ -1,48 +1,50 @@
-import React, { useState } from "react";
-import { Typography, Slider, Grid, Button, Box, Checkbox } from "@mui/material";
+import React, { useState, useEffect } from "react";
+import { Typography, Slider, Button, Box } from "@mui/material";
+import { Radio, RadioGroup, FormControlLabel } from "@mui/material";
 
-function RatingScale() {
-  const initialRatings = [0, 0, 0, 0, 0];
-  const [ratings, setRatings] = useState(initialRatings);
-  const [selectedOptions, setSelectedOptions] = useState<number[]>([]);
-  const options = [
-    "Basic Understanding",
-    "Deeper Exploration",
-    "Application and Analysis",
-    "Critical Analysis",
-    "Synthesis and Evaluation",
-  ];
+interface RecommendationObject {
+  _id: {
+    $oid: string;
+  };
+  SearchTerm: string;
+  PredictedKnowledge: number;
+}
 
-  const handleRatingChange = (newValue: number | number[], index: number) => {
-    if (typeof newValue === "number") {
-      const newRatings = [...ratings];
-      newRatings[index] = newValue;
-      setRatings(newRatings);
+interface RatingScaleProps {
+  recommendationObj: RecommendationObject;
+}
+
+function RatingScale({ recommendationObj }: RatingScaleProps) {
+  const [ratings, setRatings] = useState(recommendationObj.PredictedKnowledge);
+
+  const [radioOption, setRadioOption] = useState("");
+  const [scaleDisabled, setScaleDisable] = useState<boolean>(true);
+  console.log(recommendationObj);
+  console.log(recommendationObj.PredictedKnowledge);
+
+  useEffect(() => {
+    setRatings(recommendationObj.PredictedKnowledge);
+  }, [recommendationObj]);
+
+  const handleRadioChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setScaleDisable(event.target.value === "yes");
+    if (event.target.value === "yes") {
+      setRadioOption("yes");
+    } else {
+      setRadioOption("no");
     }
   };
-
-  const handleCheckboxChange = (index: number) => {
-    const selectedIndex = selectedOptions.indexOf(index);
-    const newSelectedOptions = [...selectedOptions];
-
-    if (selectedIndex === -1) {
-      newSelectedOptions.push(index);
-    } else {
-      newSelectedOptions.splice(selectedIndex, 1);
+  const handleRatingChange = (newValue: number) => {
+    if (typeof newValue === "number") {
+      const oldRatings = ratings;
+      setRatings(newValue);
     }
-
-    setSelectedOptions(newSelectedOptions);
   };
 
   const handleUpdate = () => {
     // Handle the update action for selected options with their ratings
-    const selectedRatings = selectedOptions.map((index) => ({
-      optionIndex: index,
-      rating: ratings[index],
-    }));
 
-    console.log("Selected Options:", selectedOptions);
-    console.log("Selected Ratings:", selectedRatings);
+    console.log("Ratings:", ratings);
   };
 
   return (
@@ -51,50 +53,58 @@ function RatingScale() {
         <b>Provide Feedback :</b>
         <br></br>
         This recommendation is made to you as you have covered the below
-        category of information in the topic you searched. Please check the
-        boxes that have been identified incorrectly by the system and adjust the
-        level that you think represents your prior knowledge about the topics.
+        category of information in the topic you searcheduseEffect. Please check
+        the boxes that have been identified incorrectly by the system and adjust
+        the level that you think represents your prior knowledge about the
+        topics.
       </Typography>
-      <Grid container spacing={2}>
-        {ratings.map((rating, index) => (
-          <Grid item xs={12} key={index}>
-            <Grid container alignItems="center">
-              <Grid item xs={1}>
-                <Checkbox
-                  checked={selectedOptions.includes(index)}
-                  onChange={() => handleCheckboxChange(index)}
-                />
-              </Grid>
-              <Grid item xs={5}>
-                <Typography variant="subtitle1" style={{ marginRight: "15px" }}>
-                  {options[index]}
-                </Typography>
-              </Grid>
-              <Grid item xs={6}>
-                <div style={{ position: "relative" }}>
-                  <Slider
-                    value={rating}
-                    onChange={(e, newValue) =>
-                      handleRatingChange(newValue as number, index)
-                    }
-                    min={0}
-                    max={5}
-                    step={1}
-                  />
-                  <div className="scaleValues">
-                    <span>0</span>
-                    <span>1</span>
-                    <span>2</span>
-                    <span>3</span>
-                    <span>4</span>
-                    <span>5</span>
-                  </div>
-                </div>
-              </Grid>
-            </Grid>
-          </Grid>
-        ))}
-      </Grid>
+      <div style={{ position: "relative" }}>
+        <Slider
+          value={ratings}
+          onChange={(e, newValue) => handleRatingChange(newValue as number)}
+          min={0}
+          max={5}
+          step={1}
+          disabled={scaleDisabled}
+        />
+        <div className="scaleValues">
+          <span>0</span>
+          <span>1</span>
+          <span>2</span>
+          <span>3</span>
+          <span>4</span>
+          <span>5</span>
+        </div>
+      </div>
+      <Box mt={1}>
+        <Typography>Is the scale provided above relevant?</Typography>
+      </Box>
+      <div>
+        <RadioGroup
+          name="yesNo"
+          value={radioOption}
+          onChange={handleRadioChange}
+          row // Use 'row' to display radio buttons horizontally
+        >
+          <FormControlLabel
+            value="yes"
+            control={<Radio />}
+            label="Yes"
+            labelPlacement="end" // Adjust label placement as needed
+          />
+          <FormControlLabel
+            value="no"
+            control={<Radio />}
+            label="No"
+            labelPlacement="end" // Adjust label placement as needed
+          />
+        </RadioGroup>
+        <p>
+          {scaleDisabled
+            ? "Please Submit the Feedback"
+            : "Please Update the scale to match your knwoledge and submit the feedback"}
+        </p>
+      </div>
       <Box mt={2}>
         <Button variant="contained" color="primary" onClick={handleUpdate}>
           Send Feedback
