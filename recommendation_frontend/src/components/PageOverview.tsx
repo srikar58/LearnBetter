@@ -63,16 +63,16 @@ function PageOverview(): JSX.Element {
         <div className="result" key="1">
           <h3>{result.Topic}</h3>
           <p className="subtopic">{result.SubTopic}</p>
-          <p>{result.Summary}</p>
+          {/* <p>{result.Summary}</p> */}
           <p dangerouslySetInnerHTML={{ __html: result.Content }}></p>
-          <a
+          {/* <a
             href={result.Link}
             target="_blank"
             rel="nofollow"
             // onClick={() => handleReadMore(result.ID)}
           >
             Read More
-          </a>
+          </a> */}
         </div>
         <Link to={`/results/${term}`}>
           <Button variant="outlined" style={styles.backButton}>

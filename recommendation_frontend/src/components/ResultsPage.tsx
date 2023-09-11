@@ -35,6 +35,7 @@ function ResultsPage(): JSX.Element {
   const { term } = useParams<{ term: string }>();
   const [searchTerm, setSearchTerm] = useState(term);
   const [results, setResults] = useState<SearchResult[]>([]);
+  const [feedbackSent, setFeedbackSent] = useState(false);
   const [recommendation, setRecommendation] = useState<Recommendation>({
     document: {
       Topic: "",
@@ -53,7 +54,7 @@ function ResultsPage(): JSX.Element {
     },
     Status: false,
   });
-  const [recommendationExist, setRecommendationExist] = useState<Boolean>();
+  const [recommendationExist, setRecommendationExist] = useState<Boolean>(true);
 
   const navigate = useNavigate();
 
@@ -146,50 +147,65 @@ function ResultsPage(): JSX.Element {
                   <h3>{result.Topic}</h3>
                   <p className="subtopic">{result.SubTopic}</p>
                   <p dangerouslySetInnerHTML={{ __html: result.Summary }}></p>
-                  <a
-                    target="_blank"
+                  <button
                     rel="nofollow"
                     onClick={() => handleReadMore(result.ID)}
                   >
                     Read More
-                  </a>
+                  </button>
                 </div>
               ))}
           </Grid>
           <Grid item xs={4}>
-            <div className="recommendation">
-              <div
-                style={{
-                  maxWidth: "90%",
-                  marginLeft: "5%",
-                  marginRight: "5%",
-                  boxSizing: "border-box",
-                  alignItems: "center",
-                  padding: "4%", // Add padding for spacing within the border
-                }}
-              >
-                <h2 style={{ marginBottom: "16px" }}>Recommended for you</h2>
-                <div className="result">
-                  <h3>{recommendation.document.Topic}</h3>
-                  <p className="subtopic">{recommendation.document.SubTopic}</p>
-                  <p
-                    dangerouslySetInnerHTML={{
-                      __html: recommendation.document.Summary,
+            {recommendationExist ? (
+              <div className="recommendation">
+                <div
+                  style={{
+                    maxWidth: "90%",
+                    marginLeft: "5%",
+                    marginRight: "5%",
+                    boxSizing: "border-box",
+                    alignItems: "center",
+                    padding: "4%", // Add padding for spacing within the border
+                  }}
+                >
+                  <h2 style={{ marginBottom: "16px" }}>Recommended for you</h2>
+                  <div className="result">
+                    <h3>{recommendation.document.Topic}</h3>
+                    <p className="subtopic">
+                      {recommendation.document.SubTopic}
+                    </p>
+                    <p
+                      dangerouslySetInnerHTML={{
+                        __html: recommendation.document.Summary,
+                      }}
+                    ></p>
+                    <button
+                      rel="nofollow"
+                      onClick={() => {
+                        feedbackSent
+                          ? handleReadMore(recommendation.document.ID)
+                          : alert(
+                              "Please provide feedback before Reading this recommended page!"
+                            );
+                      }}
+                    >
+                      Read More
+                    </button>
+                  </div>
+                  <RatingScale
+                    recommendationObj={recommendation.recommendation_obj}
+                    onFeedbackSent={() => {
+                      setFeedbackSent(true);
                     }}
-                  ></p>
-                  <a
-                    target="_blank"
-                    rel="nofollow"
-                    onClick={() => handleReadMore(recommendation.document.ID)}
-                  >
-                    Read More
-                  </a>
+                  />
                 </div>
-                <RatingScale
-                  recommendationObj={recommendation.recommendation_obj}
-                />
               </div>
-            </div>
+            ) : (
+              <div>
+                <p>Not enough User activity</p>
+              </div>
+            )}
           </Grid>
         </Grid>
       </div>

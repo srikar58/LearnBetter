@@ -5,6 +5,7 @@ import json
 from bson import json_util
 from .processRecommendation import process_recommendation
 from .processActivity import process_activity
+from .feedback import UpdateFeedback
 # Create your views here.
 
 
@@ -41,5 +42,22 @@ def post_activity_api(request):
 
         serialised_result = json.loads(json_util.dumps(result))
         return JsonResponse(serialised_result, safe=False)
+    else:
+        return JsonResponse({'error': 'Invalid request method'})
+
+
+@csrf_exempt
+def update_feedback_api(request):
+    if request.method == 'POST':
+        print(request.POST)
+        recommendation = json.loads(request.POST.get('recommendation'))
+        user_name = request.headers.get('Username')
+        recommendation_feedback = request.POST.get(
+            'recommendation_feedback')
+        rating_feedback = request.POST.get('rating_feedback')
+        updated_rating = request.POST.get('updated_rating')
+        response = UpdateFeedback(user_name, recommendation,
+                                  recommendation_feedback, rating_feedback, updated_rating)
+        return JsonResponse(response)
     else:
         return JsonResponse({'error': 'Invalid request method'})

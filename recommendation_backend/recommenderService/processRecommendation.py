@@ -3,6 +3,7 @@ from fetchResults import models as ResultsModels
 from mongoengine.queryset import Q
 import json
 from datetime import datetime, timedelta, timezone
+from fetchResults import models as ResultsModels
 
 
 def process_recommendation(user_name, search_term):
@@ -12,11 +13,24 @@ def process_recommendation(user_name, search_term):
     try:
         user_document = User.objects.get(UserName=user_name)
     except:
-        return {"Status": False}
+        user_document = User(UserName=user_name)
+        user_document.save()
+        print("Registered a new User: ", user_name)
     print(user_document.UserName)
 
     matching_activities = [
         activity for activity in user_document.Activity if search_term in activity.SearchTerms]
+
+    if (len(matching_activities) == 0):
+        data_document = fetch_results(search_term)
+        knowledge_level = 0
+        recommendation = save_recommendation_to_db(
+            search_term, data_document, knowledge_level)
+        save_new_user_to_db(user_name, search_term,
+                            recommendation, "Basic_1", data_document)
+        print("-------------------New Recommendation-------------------")
+        return {"document": data_document.to_mongo().to_dict(),
+                "recommendation_obj": recommendation.to_mongo().to_dict(), "Status": True}
 
     matching_activities.sort(key=lambda x: len(x.PagesAccessed), reverse=True)
 
@@ -28,7 +42,7 @@ def process_recommendation(user_name, search_term):
         data_document = ResultsModels.DataDocument.objects(
             Q(Topic__icontains=activity.Topic) & Q(Category_A=categories[0]) & Q(Category_B=categories[1])).first()
         if data_document is None:
-            print("------------------This block is running")
+            # print("------------------This block is running")
             categories = next_level(activity.Level, 1)
             print(activity.Topic, categories[0], categories[1])
             data_document = ResultsModels.DataDocument.objects(
@@ -37,6 +51,8 @@ def process_recommendation(user_name, search_term):
         else:
             matched_activity = activity
             break
+        # if data_document is None:
+        #     return
 
     # process_knowledge_level(matched_activity)
     # reccomendation = Recommendations(SearchTerm, )
@@ -78,6 +94,19 @@ def next_level(level, step):
             return ["Level "+str(category_a+1), '1']
 
 
+def save_new_user_to_db(username, search_term, recommendation, level, data_document):
+    activity = UserActivity(
+        Topic=data_document.Topic,
+        SearchTerms=[search_term],
+        Level=level,
+        ActiveRecommendation=recommendation
+    )
+    user = User.objects(UserName=username).first()
+    user.RecommendationsFeed.append(recommendation)
+    user.Activity.append(activity)
+    user.save()
+
+
 def save_recommendation_to_db(search_term, data_document, knowledge_level):
     est_offset = timedelta(hours=-4)
     recommendation = Recommendations(
@@ -88,18 +117,37 @@ def save_recommendation_to_db(search_term, data_document, knowledge_level):
 
 
 def process_knowledge_level(activity):
-    pages = len(set(activity.PagesAccessed))
+
+    unique_levels = set()
     total_pages = ResultsModels.DataDocument.objects(
         Topic=activity.Topic).count()
+    for page in activity.PagesAccessed:
+        unique_levels.add(page.Category_A)
+    print("------------------------", unique_levels,
+          "-----------------------------------")
+    pages = len(unique_levels)
     print("No of unique pages accessed in this topic is ", pages)
-    if pages == 0:
-        return 0
-    elif pages == 1:
-        return 2
-    elif pages == 2:
-        return 3
-    elif pages > 2 and pages < total_pages:
-        return 4
-    else:
-        return 5
+    # if pages == 0:
+    #     return 0
+    # elif pages == 1:
+    #     return 1
+    # elif pages == 2:
+    #     return 3
+    # elif pages > 2 and pages < total_pages:
+    #     return 4
+    # else:
+    #     return 5
+    return pages
     # print("No of unique pages accessed in this topic is ", pages)
+
+
+def fetch_results(search_term):
+    search_word_array = search_term.lower().split()  # Convert search terms to array
+    print(search_word_array)
+
+    query = {'$or': [{'Keywords.' + key: {'$exists': True}} for key in search_word_array],
+             'Category_A': 'Level 1',
+             'Category_B': 1}
+
+    result = ResultsModels.DataDocument.objects(__raw__=query).first()
+    return result
