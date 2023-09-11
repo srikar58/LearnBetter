@@ -9,8 +9,8 @@ class Recommendations(mongoengine.Document):
     Recommendation = mongoengine.ReferenceField(resultsModels.DataDocument)
     Feedback = mongoengine.IntField()
     PredictedKnowledge = mongoengine.IntField()
-    userAgreement = mongoengine.DictField()
-    updatedKnowledge = mongoengine.IntField()
+    UserAgreement = mongoengine.DictField()
+    UpdatedKnowledge = mongoengine.IntField()
     TimeStamp = mongoengine.DateTimeField()
     RecommendationLevel = mongoengine.StringField
 

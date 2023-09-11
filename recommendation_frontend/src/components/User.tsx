@@ -8,7 +8,7 @@ import Button from "@mui/material/Button";
 import AdbIcon from "@mui/icons-material/Adb";
 import { useState } from "react";
 import LoginModal from "./Signin";
-
+import AutoStoriesIcon from "@mui/icons-material/AutoStories";
 function User() {
   const [userName, setUserName] = useState<String | null>(
     localStorage.getItem("username")
@@ -28,7 +28,9 @@ function User() {
     <AppBar position="relative">
       <Container maxWidth="xl">
         <Toolbar disableGutters style={{ justifyContent: "space-between" }}>
-          <AdbIcon sx={{ display: { xs: "none", md: "flex" }, mr: 1 }} />
+          <AutoStoriesIcon
+            sx={{ display: { xs: "flex", md: "flex" }, mr: 1 }}
+          />
           <Typography
             variant="h5"
             noWrap

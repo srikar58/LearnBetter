@@ -145,7 +145,7 @@ h1 {
 .result p .searchmatch {
   font-weight: 700;
 }
-.result a {
+.result button {
   display: inline-block;
   padding: 12px 16px;
   background-color: #a84fff;
@@ -156,7 +156,7 @@ h1 {
   transition: 0.4s;
 }
 
-.result a:hover {
+.result button:hover {
   background-color: #ff4fa8;
   cursor: pointer;
 }
