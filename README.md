@@ -23,7 +23,7 @@
 
     # For windows systems
       # From command prompt
-        .env\bin\activate.bat
+        ./.venv/Scripts/activate
 
       # From power shell
         .env\Scripts\Activate.ps1
