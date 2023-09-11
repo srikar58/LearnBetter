@@ -4,7 +4,7 @@ from collections import defaultdict
 import sys
 
 # Define your MongoDB connection settings
-MONGO_DB_NAME = 'recommendation'
+MONGO_DB_NAME = 'recommendation_app_3'
 MONGO_DB_HOST = 'localhost'
 MONGO_DB_PORT = 27017  # Default MongoDB port
 
@@ -42,7 +42,7 @@ for index, row in data_df.iterrows():
     # keywords.extend(row['Summary'].split())
 
     keyword_counts = defaultdict(int)
-    keywords = row['Topic'].split() + row['Sub-topic'].split() + row['Content'].split()
+    keywords = row['Topic'].split() + row['Sub-topic'].split() + row['Summary'].split()
     
     for keyword in keywords:
         keyword_counts[keyword.lower()] += 1

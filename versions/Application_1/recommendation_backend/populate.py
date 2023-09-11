@@ -4,7 +4,7 @@ from collections import defaultdict
 import sys
 
 # Define your MongoDB connection settings
-MONGO_DB_NAME = 'recommendation'
+MONGO_DB_NAME = 'recommendation_app_1'
 MONGO_DB_HOST = 'localhost'
 MONGO_DB_PORT = 27017  # Default MongoDB port
 
