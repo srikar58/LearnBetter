@@ -16,13 +16,17 @@ def filter_results_api(request):
         search_word = request.GET.get('search_term')
         user = request.headers.get('Username')
         results = process_filter(search_word)
-        recommendation = processRecommendation.process_recommendation(
-            user, search_word)
-        print(type(recommendation))
-        print(type(results))
+        if (len(results) == 0):
+            response = {"Status": "Not Found"}
+        else:
+            recommendation = processRecommendation.process_recommendation(
+                user, search_word)
+            print(type(recommendation))
+            print(type(results))
 
-        # print(type(result[0]))
-        response = {'results': results, 'recommendation': recommendation}
+            # print(type(result[0]))
+            response = {'results': results,
+                        'recommendation': recommendation, "Status": "Success"}
 
         serialised_result = json.loads(json_util.dumps(response))
         return JsonResponse(serialised_result, safe=False)

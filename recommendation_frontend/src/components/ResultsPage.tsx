@@ -75,12 +75,19 @@ function ResultsPage(): JSX.Element {
         }
 
         const json_response = await response.json();
-        setResults(json_response.results);
-        console.log(json_response.recommendation);
-        if (json_response.recommendation.Status) {
-          setRecommendation(json_response.recommendation);
+
+        if (json_response.Status === "Not Found") {
+          console.log("Invalid search term");
+          alert("Please enter the Search terms as directed by the researcher.");
+          navigate("/");
         } else {
-          setRecommendationExist(false);
+          setResults(json_response.results);
+          console.log(json_response.recommendation);
+          if (json_response.recommendation.Status) {
+            setRecommendation(json_response.recommendation);
+          } else {
+            setRecommendationExist(false);
+          }
         }
       } catch (error) {
         console.error("An error occurred:", error);

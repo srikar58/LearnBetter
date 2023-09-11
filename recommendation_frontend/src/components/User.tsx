@@ -5,15 +5,17 @@ import Toolbar from "@mui/material/Toolbar";
 import Typography from "@mui/material/Typography";
 import Container from "@mui/material/Container";
 import Button from "@mui/material/Button";
-import AdbIcon from "@mui/icons-material/Adb";
+import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 import LoginModal from "./Signin";
 import AutoStoriesIcon from "@mui/icons-material/AutoStories";
+
 function User() {
   const [userName, setUserName] = useState<String | null>(
     localStorage.getItem("username")
   );
 
+  const navigate = useNavigate();
   const [loginOpen, setLoginOpen] = useState<boolean>(false);
 
   React.useEffect(() => {
@@ -29,7 +31,14 @@ function User() {
       <Container maxWidth="xl">
         <Toolbar disableGutters style={{ justifyContent: "space-between" }}>
           <AutoStoriesIcon
-            sx={{ display: { xs: "flex", md: "flex" }, mr: 1 }}
+            sx={{
+              display: { xs: "flex", md: "flex" },
+              mr: 1,
+              cursor: "pointer",
+            }}
+            onClick={() => {
+              navigate("/");
+            }}
           />
           <Typography
             variant="h5"
