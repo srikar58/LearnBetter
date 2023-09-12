@@ -56,7 +56,7 @@ function ResultsPage(): JSX.Element {
     },
     Status: false,
   });
-  const [recommendationExist, setRecommendationExist] = useState<Boolean>(true);
+  const [recommendationExist, setRecommendationExist] = useState<Boolean>(false);
 
   const [isFeedbackModalOpen, setFeedbackModalOpen] = useState(false);
   const [feedbackValue, setFeedbackValue] = useState<number>(-1);
@@ -90,6 +90,7 @@ function ResultsPage(): JSX.Element {
           console.log(json_response.recommendation);
           if (json_response.recommendation.Status) {
             setRecommendation(json_response.recommendation);
+            setRecommendationExist(true)
           } else {
             setRecommendationExist(false);
           }
@@ -249,7 +250,7 @@ function ResultsPage(): JSX.Element {
               </div>
             ) : (
               <div>
-                <p>Not enough User activity</p>
+                <p></p>
               </div>
             )}
           </Grid>

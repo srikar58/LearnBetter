@@ -9,7 +9,7 @@ from fetchResults import models as ResultsModels
 def process_recommendation(user_name, search_term):
     # search_word_array = search_term.lower().split()  # Convert search terms to array
     search_term = search_term.lower()
-    print(search_term, "_")
+    print(search_term, "_Recommendation process")
     try:
         user_document = User.objects.get(UserName=user_name)
     except:
@@ -23,14 +23,22 @@ def process_recommendation(user_name, search_term):
 
     if (len(matching_activities) == 0):
         data_document = fetch_results(search_term)
-        knowledge_level = 0
-        recommendation = save_recommendation_to_db(
-            search_term, data_document, knowledge_level)
-        save_new_user_to_db(user_name, search_term,
-                            recommendation, "Basic_1", data_document)
-        print("-------------------New Recommendation-------------------")
-        return {"document": data_document.to_mongo().to_dict(),
-                "recommendation_obj": recommendation.to_mongo().to_dict(), "Status": True}
+        matching_activity = [activity for activity in user_document.Activity if data_document.Topic == activity.Topic]
+        if(len(matching_activity)==0):
+            knowledge_level = 0
+            recommendation = save_recommendation_to_db(
+                search_term, data_document, knowledge_level)
+            save_new_user_to_db(user_name, search_term,
+                                recommendation, "Basic_1", data_document)
+            print("-------------------New Recommendation-------------------")
+            return {"document": data_document.to_mongo().to_dict(),
+                    "recommendation_obj": recommendation.to_mongo().to_dict(), "Status": True}
+        elif matching_activity[0].ActiveRecommendation is not None and matching_activity[0].ActiveRecommendation.Recommendation == data_document:
+            matching_activity[0].SearchTerms.append(search_term)
+            user_document.save()
+            print("-------------------Duplicate Recommendation-----------------")
+            return {"document": data_document.to_mongo().to_dict(),
+                    "recommendation_obj": matching_activity[0].ActiveRecommendation.to_mongo().to_dict(), "Status": True}
 
     matching_activities.sort(key=lambda x: len(x.PagesAccessed), reverse=True)
 

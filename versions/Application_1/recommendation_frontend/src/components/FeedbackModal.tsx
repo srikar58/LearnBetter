@@ -52,7 +52,6 @@ const marks = [
     label: '5',
   },
 ];
-
   return (
     <div className="overlay hidden">
       <Modal
@@ -71,9 +70,10 @@ const marks = [
                 alignItems: "center",
               }}
             >
-              <Typography component="h1" variant="h5">
+              <Typography component="h1" variant="h6">
                 Recommendation Quality
               </Typography>
+              <Typography component="h2" textAlign={"center"}> The Recommended item was relevant.</Typography>
             <div style={{ position: "relative",width:"80%" }}>
                 <Slider
                 value={recommendationFeedback}
@@ -87,7 +87,6 @@ const marks = [
                 <span>Disagree</span>
                 <span>Agree</span>
                 </div>
-
             </div>
             <Button
                 type="submit"

@@ -32,4 +32,6 @@ urlpatterns = [
     path('get_page/', fetchResults.views.fetch_result_api, name='fetch_a_page'),
     path('update_feedback/', recommender_viewes.update_feedback_api,
          name='update_feedback'),
+    path('update_recommendation_feedback/', recommender_viewes.update_recommendation_feedback_api,
+    name='update_recommendation_feedback'),
 ]
