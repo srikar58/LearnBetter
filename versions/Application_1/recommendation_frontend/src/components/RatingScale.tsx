@@ -90,6 +90,33 @@ function RatingScale({ recommendationObj, onFeedbackSent }: RatingScaleProps) {
     console.log("Ratings:", ratings);
   };
 
+  const marks = [
+    {
+      value: 0,
+      label: '0',
+    },
+    {
+      value: 1,
+      label: '1',
+    },
+    {
+      value: 2,
+      label: '2',
+    },
+    {
+      value: 3,
+      label: '3',
+    },
+    {
+      value: 4,
+      label: '4',
+    },
+    {
+      value: 5,
+      label: '5',
+    },
+  ];
+
   return (
     <div style={{ marginTop: "10px" }}>
       {feedbackTabEnable ? (
@@ -107,15 +134,12 @@ function RatingScale({ recommendationObj, onFeedbackSent }: RatingScaleProps) {
               min={0}
               max={5}
               step={1}
+              marks={marks}
               disabled
             />
             <div className="scaleValues">
-              <span>0</span>
-              <span>1</span>
-              <span>2</span>
-              <span>3</span>
-              <span>4</span>
-              <span>5</span>
+                <span>Disagree</span>
+                <span>Agree</span>
             </div>
           </div>
           <Box mt={1}>

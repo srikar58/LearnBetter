@@ -36,10 +36,12 @@ function RatingScale({ recommendationObj, onFeedbackSent }: RatingScaleProps) {
   useEffect(() => {
     setRatings(recommendationObj.PredictedKnowledge);
     console.log(ratingFeedback);
-    if (ratingFeedback !== "") {
+    if ((ratingFeedback !== "" && ratings!==recommendationObj.PredictedKnowledge) || ratingFeedback ==="yes") {
       setFeedbackButtonDisabled(false);
+    } else{
+      setFeedbackButtonDisabled(true)
     }
-  }, [recommendationObj, ratingFeedback]);
+  }, [recommendationObj, ratingFeedback, updatedRating]);
 
   const handleRatingFeedbackChange = (
     event: React.ChangeEvent<HTMLInputElement>
@@ -88,11 +90,38 @@ function RatingScale({ recommendationObj, onFeedbackSent }: RatingScaleProps) {
     console.log("Ratings:", ratings);
   };
 
+  const marks = [
+    {
+      value: 0,
+      label: '0',
+    },
+    {
+      value: 1,
+      label: '1',
+    },
+    {
+      value: 2,
+      label: '2',
+    },
+    {
+      value: 3,
+      label: '3',
+    },
+    {
+      value: 4,
+      label: '4',
+    },
+    {
+      value: 5,
+      label: '5',
+    },
+  ];
+
   return (
     <div style={{ marginTop: "10px" }}>
       {feedbackTabEnable ? (
         <div>
-          <Typography variant="body2" gutterBottom style={{ fontSize: "15px" }}>
+          <Typography variant="body2" gutterBottom style={{ fontSize: "1rem" }}>
             <b>Provide Feedback :</b>
             <br />
             The recommendation above was given to you because the system
@@ -105,19 +134,16 @@ function RatingScale({ recommendationObj, onFeedbackSent }: RatingScaleProps) {
               min={0}
               max={5}
               step={1}
+              marks={marks}
               disabled={scaleDisabled}
             />
-            <div className="scaleValues">
-              <span>0</span>
-              <span>1</span>
-              <span>2</span>
-              <span>3</span>
-              <span>4</span>
-              <span>5</span>
-            </div>
           </div>
+          <div className="scaleValues">
+                <span>Disagree</span>
+                <span>Agree</span>
+            </div>
           <Box mt={1}>
-            <Typography>
+            <Typography style={{ fontSize: "1rem" }}>
               Do you think the level of your understanding is correct?
             </Typography>
           </Box>
@@ -127,27 +153,28 @@ function RatingScale({ recommendationObj, onFeedbackSent }: RatingScaleProps) {
               value={ratingFeedback}
               onChange={handleRatingFeedbackChange}
               row // Use 'row' to display radio buttons horizontally
+              sx={{fontSize:"1rem"}}
             >
               <FormControlLabel
                 value="yes"
-                control={<Radio />}
+                control={<Radio size="small"/>}
                 label="Yes"
                 labelPlacement="end" // Adjust label placement as needed
               />
               <FormControlLabel
                 value="no"
-                control={<Radio />}
+                control={<Radio size="small"/>}
                 label="No"
                 labelPlacement="end" // Adjust label placement as needed
               />
               <FormControlLabel
                 value="maybe"
-                control={<Radio />}
+                control={<Radio size="small"/>}
                 label="Maybe"
                 labelPlacement="end" // Adjust label placement as needed
               />
             </RadioGroup>
-            <p>
+            <p style={{ fontSize: "15px" }}>
               {scaleDisabled
                 ? "Please Submit the Feedback"
                 : "Adjust the slider above to match your actual level of understanding"}
