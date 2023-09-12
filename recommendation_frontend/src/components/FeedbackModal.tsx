@@ -74,6 +74,7 @@ const marks = [
               <Typography component="h1" variant="h5">
                 Recommendation Quality
               </Typography>
+              <Typography component="h2" textAlign={"center"}> The Recommended item was relevant.</Typography>
             <div style={{ position: "relative",width:"80%" }}>
                 <Slider
                 value={recommendationFeedback}
