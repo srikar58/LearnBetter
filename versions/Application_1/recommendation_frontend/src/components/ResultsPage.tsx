@@ -3,8 +3,6 @@ import { useParams } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
 import Grid from "@mui/material/Grid";
 import User from "./User";
-import RatingScale from "./RatingScale";
-import FeedbackModal from "./FeedbackModal";
 
 interface SearchResult {
   Topic: string;
@@ -37,7 +35,6 @@ function ResultsPage(): JSX.Element {
   const { term } = useParams<{ term: string }>();
   const [searchTerm, setSearchTerm] = useState(term);
   const [results, setResults] = useState<SearchResult[]>([]);
-  const [feedbackSent, setFeedbackSent] = useState(false);
   const [recommendation, setRecommendation] = useState<Recommendation>({
     document: {
       Topic: "",
@@ -60,9 +57,6 @@ function ResultsPage(): JSX.Element {
 
   const navigate = useNavigate();
 
-  const [isFeedbackModalOpen, setFeedbackModalOpen] = useState(false);
-  const [feedbackValue, setFeedbackValue] = useState<number>(-1);
-
   const [username, setUsername] = useState<string | null>(
     localStorage.getItem("username")
   );
@@ -71,7 +65,7 @@ function ResultsPage(): JSX.Element {
     const fetchResults = async () => {
       const headers = { Username: String(username) };
       try {
-        const endpoint = `http://127.0.0.1:8000/filter_results/?search_term=${searchTerm}`;
+        const endpoint = `http://127.0.0.1:8001/filter_results/?search_term=${searchTerm}`;
 
         const response = await fetch(endpoint, { headers });
 
@@ -117,7 +111,7 @@ function ResultsPage(): JSX.Element {
 
       formData.append("search_term", String(searchTerm));
       formData.append("accessed_page_Id", String(resultID));
-      const response = await fetch("http://127.0.0.1:8000/process_activity/", {
+      const response = await fetch("http://127.0.0.1:8001/process_activity/", {
         method: "POST",
         body: formData,
         headers,
@@ -133,39 +127,6 @@ function ResultsPage(): JSX.Element {
     } catch (error) {
       console.error("An error occurred:", error);
     }
-  };
-
-  const handleFeedbackSubmit = async (feedback: number) => {
-
-    console.log("Feedback submitted:", feedback);
-
-    const headers = { Username: String(username) };
-    try {
-      const formData = new FormData();
-
-      formData.append("recommendation", JSON.stringify(recommendation.recommendation_obj));
-      formData.append("recommendation_feedback", String(feedback));
-      const response = await fetch("http://127.0.0.1:8000/update_recommendation_feedback/", {
-        method: "POST",
-        body: formData,
-        headers,
-      });
-
-      if (!response.ok) {
-        throw Error(response.statusText);
-      }
-
-      const json_response = await response.json();
-
-      console.log(json_response);
-      if (json_response.Status === "Success") {
-        handleReadMore(recommendation.document.ID)
-      }
-    } catch (e) {
-      console.log("Some error");
-    }
-
-    // navigate("/your-desired-page"); 
   };
 
   return (
@@ -228,23 +189,11 @@ function ResultsPage(): JSX.Element {
                     ></p>
                     <button
                       rel="nofollow"
-                      onClick={() => {
-                        feedbackSent
-                          ? setFeedbackModalOpen(true)
-                          : alert(
-                              "Please provide feedback before Reading this recommended page!"
-                            );
-                      }}
+                      onClick={() => handleReadMore(recommendation.document.ID)}
                     >
                       Read More
                     </button>
                   </div>
-                  <RatingScale
-                    recommendationObj={recommendation.recommendation_obj}
-                    onFeedbackSent={() => {
-                      setFeedbackSent(true);
-                    }}
-                  />
                 </div>
               </div>
             ) : (
@@ -255,15 +204,6 @@ function ResultsPage(): JSX.Element {
           </Grid>
         </Grid>
       </div>
-      {/* Render the FeedbackModal */}
-      <FeedbackModal
-        open={isFeedbackModalOpen}
-        onClose={() => setFeedbackModalOpen(false)} // Close the modal
-        onRecommendationFeedbackSubmit={(feedback) => {
-          setFeedbackValue(feedback); // Update the feedback value
-          handleFeedbackSubmit(feedback); // Submit feedback and navigate
-        }}
-      />
     </div>
   );
 }

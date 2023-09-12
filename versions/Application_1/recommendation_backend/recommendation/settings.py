@@ -20,7 +20,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # White listing the localhost:3000 port
 # for React
 CORS_ORIGIN_WHITELIST = (
-    'http://localhost:3000',
+    'http://localhost:3001',
 )
 
 CORS_ALLOW_ALL_ORIGINS = False

@@ -35,12 +35,13 @@ function RatingScale({ recommendationObj, onFeedbackSent }: RatingScaleProps) {
 
   useEffect(() => {
     setRatings(recommendationObj.PredictedKnowledge);
-
     console.log(ratingFeedback);
-    if (ratingFeedback !== "") {
+    if ((ratingFeedback !== "" && ratings!==recommendationObj.PredictedKnowledge) || ratingFeedback ==="yes") {
       setFeedbackButtonDisabled(false);
+    } else{
+      setFeedbackButtonDisabled(true)
     }
-  }, [recommendationObj, ratingFeedback]);
+  }, [recommendationObj, ratingFeedback, updatedRating]);
 
   const handleRatingFeedbackChange = (
     event: React.ChangeEvent<HTMLInputElement>
@@ -48,7 +49,6 @@ function RatingScale({ recommendationObj, onFeedbackSent }: RatingScaleProps) {
     setScaleDisable(event.target.value === "yes");
     setRatingFeedback(event.target.value);
   };
-
 
   const handleRatingChange = (newValue: number) => {
     if (typeof newValue === "number") {
@@ -65,7 +65,7 @@ function RatingScale({ recommendationObj, onFeedbackSent }: RatingScaleProps) {
       formData.append("recommendation", JSON.stringify(recommendationObj));
       formData.append("rating_feedback", ratingFeedback);
       formData.append("updated_rating", String(updatedRating));
-      const response = await fetch("http://127.0.0.1:8000/update_feedback/", {
+      const response = await fetch("http://127.0.0.1:8003/update_feedback/", {
         method: "POST",
         body: formData,
         headers,
@@ -121,7 +121,7 @@ function RatingScale({ recommendationObj, onFeedbackSent }: RatingScaleProps) {
     <div style={{ marginTop: "10px" }}>
       {feedbackTabEnable ? (
         <div>
-          <Typography variant="body2" gutterBottom style={{ fontSize: "15px" }}>
+          <Typography variant="body2" gutterBottom style={{ fontSize: "1rem" }}>
             <b>Provide Feedback :</b>
             <br />
             The recommendation above was given to you because the system
@@ -135,15 +135,15 @@ function RatingScale({ recommendationObj, onFeedbackSent }: RatingScaleProps) {
               max={5}
               step={1}
               marks={marks}
-              disabled
+              disabled={scaleDisabled}
             />
-            <div className="scaleValues">
-                <span>Disagree</span>
-                <span>Agree</span>
-            </div>
           </div>
+          <div className="scaleValues">
+                <span>Low</span>
+                <span>High</span>
+            </div>
           <Box mt={1}>
-            <Typography>
+            <Typography style={{ fontSize: "1rem" }}>
               Do you think the level of your understanding is correct?
             </Typography>
           </Box>
@@ -153,27 +153,32 @@ function RatingScale({ recommendationObj, onFeedbackSent }: RatingScaleProps) {
               value={ratingFeedback}
               onChange={handleRatingFeedbackChange}
               row // Use 'row' to display radio buttons horizontally
+              sx={{fontSize:"1rem"}}
             >
               <FormControlLabel
                 value="yes"
-                control={<Radio />}
+                control={<Radio size="small"/>}
                 label="Yes"
                 labelPlacement="end" // Adjust label placement as needed
               />
               <FormControlLabel
                 value="no"
-                control={<Radio />}
+                control={<Radio size="small"/>}
                 label="No"
                 labelPlacement="end" // Adjust label placement as needed
               />
               <FormControlLabel
                 value="maybe"
-                control={<Radio />}
+                control={<Radio size="small"/>}
                 label="Maybe"
                 labelPlacement="end" // Adjust label placement as needed
               />
             </RadioGroup>
-            <p>Please Submit the Feedback</p>
+            <p style={{ fontSize: "15px" }}>
+              {scaleDisabled
+                ? "Please Submit the Feedback"
+                : "Adjust the slider above to match your actual level of understanding"}
+            </p>
           </div>
           <Box mt={2}>
             <Button

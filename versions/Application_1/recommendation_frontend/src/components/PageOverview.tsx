@@ -40,7 +40,7 @@ function PageOverview(): JSX.Element {
       try {
         // Replace with your API endpoint to fetch result details by ID
         const response = await fetch(
-          `http://127.0.0.1:8000/get_page/?pageID=${pageID}`
+          `http://127.0.0.1:8001/get_page/?pageID=${pageID}`
         );
 
         if (!response.ok) {
