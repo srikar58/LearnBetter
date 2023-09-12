@@ -42,7 +42,7 @@ for index, row in data_df.iterrows():
     # keywords.extend(row['Summary'].split())
 
     keyword_counts = defaultdict(int)
-    keywords = row['Topic'].split() + row['Sub-topic'].split() + row['Summary'].split()
+    keywords = row['Topic'].split() + row['Sub-topic'].split() + row['Content'].split()
     
     for keyword in keywords:
         keyword_counts[keyword.lower()] += 1
