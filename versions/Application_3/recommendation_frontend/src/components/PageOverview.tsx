@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useParams, Link, useNavigate } from "react-router-dom";
+import { useParams, Link } from "react-router-dom";
 import { Typography, Button, Paper } from "@mui/material";
 import User from "./User";
 
@@ -33,18 +33,15 @@ function PageOverview(): JSX.Element {
   const { pageID } = useParams<{ pageID: string }>();
   const { term } = useParams<{ term: string }>();
   const [resultFound, setResultFound] = useState<boolean>();
-  const [username, setUsername] = useState<string | null>(
-    localStorage.getItem("username")
-  );
-  const navigate = useNavigate();
+
   useEffect(() => {
     // Fetch result details based on resultId
     const fetchResultDetails = async () => {
-      const headers = { Username: String(username) };
       try {
         // Replace with your API endpoint to fetch result details by ID
-        const endpoint = `http://127.0.0.1:8000/get_page/?pageID=${pageID}`;
-        const response = await fetch(endpoint, { headers });
+        const response = await fetch(
+          `http://127.0.0.1:8003/get_page/?pageID=${pageID}`
+        );
 
         if (!response.ok) {
           throw new Error("Failed to fetch result details");
@@ -52,13 +49,8 @@ function PageOverview(): JSX.Element {
 
         const resultData: SearchResult = await response.json();
         setResult(resultData);
-        if (result.Topic === "") {
-          alert("Error, Please Try again");
-        }
       } catch (error) {
         console.error("An error occurred:", error);
-        alert(error);
-        navigate("/");
       }
     };
 
