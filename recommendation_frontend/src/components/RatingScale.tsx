@@ -18,9 +18,6 @@ interface RatingScaleProps {
 function RatingScale({ recommendationObj, onFeedbackSent }: RatingScaleProps) {
   const [ratings, setRatings] = useState(recommendationObj.PredictedKnowledge);
 
-  const [recommendationFeedback, setRecommendationFeedback] =
-    useState<string>("");
-
   const [updatedRating, setUpdatedRating] = useState<number>(-1);
   const [ratingFeedback, setRatingFeedback] = useState<string>("");
   const [scaleDisabled, setScaleDisable] = useState<boolean>(true);
@@ -38,24 +35,17 @@ function RatingScale({ recommendationObj, onFeedbackSent }: RatingScaleProps) {
 
   useEffect(() => {
     setRatings(recommendationObj.PredictedKnowledge);
-    console.log(ratingFeedback !== "" && recommendationFeedback !== "");
-    console.log(ratingFeedback, recommendationFeedback);
-    if (ratingFeedback !== "" && recommendationFeedback !== "") {
+    console.log(ratingFeedback);
+    if (ratingFeedback !== "") {
       setFeedbackButtonDisabled(false);
     }
-  }, [recommendationObj, ratingFeedback, recommendationFeedback]);
+  }, [recommendationObj, ratingFeedback]);
 
   const handleRatingFeedbackChange = (
     event: React.ChangeEvent<HTMLInputElement>
   ) => {
     setScaleDisable(event.target.value === "yes");
     setRatingFeedback(event.target.value);
-  };
-
-  const handleRecommendationFeedbackChange = (
-    event: React.ChangeEvent<HTMLInputElement>
-  ) => {
-    setRecommendationFeedback(event.target.value);
   };
 
   const handleRatingChange = (newValue: number) => {
@@ -71,7 +61,6 @@ function RatingScale({ recommendationObj, onFeedbackSent }: RatingScaleProps) {
       const formData = new FormData();
 
       formData.append("recommendation", JSON.stringify(recommendationObj));
-      formData.append("recommendation_feedback", recommendationFeedback);
       formData.append("rating_feedback", ratingFeedback);
       formData.append("updated_rating", String(updatedRating));
       const response = await fetch("http://127.0.0.1:8000/update_feedback/", {
@@ -103,46 +92,6 @@ function RatingScale({ recommendationObj, onFeedbackSent }: RatingScaleProps) {
     <div style={{ marginTop: "10px" }}>
       {feedbackTabEnable ? (
         <div>
-          <Typography variant="body2" gutterBottom style={{ fontSize: "16px" }}>
-            Rate the quality of the recommendation.
-          </Typography>
-          <RadioGroup
-            name="ratingFeedback"
-            value={recommendationFeedback}
-            onChange={handleRecommendationFeedbackChange}
-            row // Use 'row' to display radio buttons horizontally
-          >
-            <FormControlLabel
-              value="very-low"
-              control={<Radio />}
-              label="Very Low"
-              labelPlacement="end" // Adjust label placement as needed
-            />
-            <FormControlLabel
-              value="low"
-              control={<Radio />}
-              label="Low"
-              labelPlacement="end" // Adjust label placement as needed
-            />
-            <FormControlLabel
-              value="Neither Low nor High"
-              control={<Radio />}
-              label="Neither Low nor High"
-              labelPlacement="end" // Adjust label placement as needed
-            />
-            <FormControlLabel
-              value="high"
-              control={<Radio />}
-              label="High"
-              labelPlacement="end" // Adjust label placement as needed
-            />
-            <FormControlLabel
-              value="very-high"
-              control={<Radio />}
-              label="Very High"
-              labelPlacement="end" // Adjust label placement as needed
-            />
-          </RadioGroup>
           <Typography variant="body2" gutterBottom style={{ fontSize: "15px" }}>
             <b>Provide Feedback :</b>
             <br />
