@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Typography, Slider, Button, Box } from "@mui/material";
-import { Radio, RadioGroup, FormControlLabel } from "@mui/material";
-
+import CircularProgressBar from "./ProgressBar";
 interface RecommendationObject {
   _id: {
     $oid: string;
@@ -18,14 +17,11 @@ interface RatingScaleProps {
 function RatingScale({ recommendationObj, onFeedbackSent }: RatingScaleProps) {
   const [ratings, setRatings] = useState(recommendationObj.PredictedKnowledge);
 
-  const [updatedRating, setUpdatedRating] = useState<number>(-1);
-  const [ratingFeedback, setRatingFeedback] = useState<string>("");
-  const [scaleDisabled, setScaleDisable] = useState<boolean>(true);
+  const [updatedRating, setUpdatedRating] = useState<number>(recommendationObj.PredictedKnowledge);
+  const [ratingFeedback, setRatingFeedback] = useState<string>("yes");
 
   const username = localStorage.getItem("username");
 
-  const [feedbackButtonDisabled, setFeedbackButtonDisabled] =
-    useState<boolean>(true);
   console.log(recommendationObj);
   console.log(recommendationObj.PredictedKnowledge);
 
@@ -35,30 +31,23 @@ function RatingScale({ recommendationObj, onFeedbackSent }: RatingScaleProps) {
 
   useEffect(() => {
     setRatings(recommendationObj.PredictedKnowledge);
+    setUpdatedRating(recommendationObj.PredictedKnowledge);
     console.log(ratingFeedback);
-    if ((ratingFeedback !== "" && ratings!==recommendationObj.PredictedKnowledge) || ratingFeedback ==="yes") {
-      setFeedbackButtonDisabled(false);
-    } else{
-      setFeedbackButtonDisabled(true)
-    }
-  }, [recommendationObj, ratingFeedback, updatedRating]);
+  }, [recommendationObj]);
 
-  const handleRatingFeedbackChange = (
-    event: React.ChangeEvent<HTMLInputElement>
-  ) => {
-    setScaleDisable(event.target.value === "yes");
-    setRatingFeedback(event.target.value);
-  };
 
   const handleRatingChange = (newValue: number) => {
     if (typeof newValue === "number") {
       setUpdatedRating(newValue);
-      setRatings(newValue);
+      setRatingFeedback(newValue === ratings ? "yes" : "no");
+      // setRatings(newValue);
     }
   };
 
   const handleUpdate = async () => {
     const headers = { Username: String(username) };
+    console.log("rating feedback", ratingFeedback)
+
     try {
       const formData = new FormData();
 
@@ -127,65 +116,35 @@ function RatingScale({ recommendationObj, onFeedbackSent }: RatingScaleProps) {
             The recommendation above was given to you because the system
             determined that your level of understanding of the topic is:
           </Typography>
-          <div style={{ position: "relative" }}>
-            <Slider
-              value={ratings}
-              onChange={(e, newValue) => handleRatingChange(newValue as number)}
-              min={0}
-              max={5}
-              step={1}
-              marks={marks}
-              disabled={scaleDisabled}
-            />
+          <div style={{ position: "relative", textAlign:"center" }}>
+            <CircularProgressBar selectedValue={ratings} maxValue={5} radius={50}/>
           </div>
-          <div className="scaleValues">
-                <span>Low</span>
-                <span>High</span>
-            </div>
           <Box mt={1}>
             <Typography style={{ fontSize: "1rem" }}>
               Do you think the level of your understanding is correct?
             </Typography>
           </Box>
           <div>
-            <RadioGroup
-              name="ratingFeedback"
-              value={ratingFeedback}
-              onChange={handleRatingFeedbackChange}
-              row // Use 'row' to display radio buttons horizontally
-              sx={{fontSize:"1rem"}}
-            >
-              <FormControlLabel
-                value="yes"
-                control={<Radio size="small"/>}
-                label="Yes"
-                labelPlacement="end" // Adjust label placement as needed
+            <div style={{ position: "relative" }}>
+              <Slider
+                value={updatedRating}
+                onChange={(e, newValue) => handleRatingChange(newValue as number)}
+                min={0}
+                max={5}
+                step={1}
+                marks={marks}
               />
-              <FormControlLabel
-                value="no"
-                control={<Radio size="small"/>}
-                label="No"
-                labelPlacement="end" // Adjust label placement as needed
-              />
-              <FormControlLabel
-                value="maybe"
-                control={<Radio size="small"/>}
-                label="Maybe"
-                labelPlacement="end" // Adjust label placement as needed
-              />
-            </RadioGroup>
-            <p style={{ fontSize: "15px" }}>
-              {scaleDisabled
-                ? "Please Submit the Feedback"
-                : "Adjust the slider above to match your actual level of understanding"}
-            </p>
+            </div>
+            <div className="scaleValues">
+                  <span>Low</span>
+                  <span>High</span>
+            </div>
           </div>
           <Box mt={2}>
             <Button
               variant="contained"
               color="primary"
               onClick={handleUpdate}
-              disabled={feedbackButtonDisabled}
             >
               Send Feedback
             </Button>

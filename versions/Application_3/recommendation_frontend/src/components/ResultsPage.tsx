@@ -58,9 +58,6 @@ function ResultsPage(): JSX.Element {
   });
   const [recommendationExist, setRecommendationExist] = useState<Boolean>(false);
 
-  const [isFeedbackModalOpen, setFeedbackModalOpen] = useState(false);
-  const [feedbackValue, setFeedbackValue] = useState<number>(-1);
-
   const navigate = useNavigate();
 
   const [username, setUsername] = useState<string | null>(
@@ -110,58 +107,44 @@ function ResultsPage(): JSX.Element {
     }
   };
 
-  const handleReadMore = async (resultID: number) => {
+  const process_activity = async (resultID: number) => {
     const headers = { Username: String(username) };
-    try {
-      const formData = new FormData();
+    const formData = new FormData();
 
-      formData.append("search_term", String(searchTerm));
-      formData.append("accessed_page_Id", String(resultID));
-      const response = await fetch("http://127.0.0.1:8003/process_activity/", {
-        method: "POST",
-        body: formData,
-        headers,
-      });
+    formData.append("search_term", String(searchTerm));
+    formData.append("accessed_page_Id", String(resultID));
+    const response = await fetch("http://127.0.0.1:8003/process_activity/", {
+      method: "POST",
+      body: formData,
+      headers,
+    });
 
-      if (!response.ok) {
-        throw Error(response.statusText);
-      }
+    if (!response.ok) {
+      throw Error(response.statusText);
+    }
 
-      const json_response = await response.json();
-      console.log(json_response);
-      navigate("/search/" + searchTerm + "/page/" + resultID);
-    } catch (error) {
+    const json_response = await response.json();
+    console.log(json_response);
+    navigate("/search/" + searchTerm + "/page/" + resultID, {state: {"recommendation_obj":recommendation}});
+  }
+
+  const handleReadMore = async (result: SearchResult) => {
+    try{
+      process_activity(result.ID)
+      navigate("/search/" + searchTerm + "/page/" + result.ID, {state: {"document":result, "isRecommendation": false}});
+    }
+    catch (error) {
       console.error("An error occurred:", error);
+      return error;
     }
   };
 
-  const handleFeedbackSubmit = async (feedback: number) => {
-
-    
-    console.log("Feedback submitted:", feedback);
+  const handleRecommendationReadMore = async () => {
 
     const headers = { Username: String(username) };
     try {
-      const formData = new FormData();
-
-      formData.append("recommendation", JSON.stringify(recommendation.recommendation_obj));
-      formData.append("recommendation_feedback", String(feedback));
-      const response = await fetch("http://127.0.0.1:8003/update_recommendation_feedback/", {
-        method: "POST",
-        body: formData,
-        headers,
-      });
-
-      if (!response.ok) {
-        throw Error(response.statusText);
-      }
-
-      const json_response = await response.json();
-
-      console.log(json_response);
-      if (json_response.Status === "Success") {
-        handleReadMore(recommendation.document.ID)
-      }
+      process_activity(recommendation.document.ID);
+      navigate("/search/" + searchTerm + "/page/" + recommendation.document.ID, {state: {"document":recommendation.document, "recommendation_obj": recommendation.recommendation_obj, "isRecommendation": true}});
     } catch (e) {
       console.log("Some error");
     }
@@ -196,7 +179,7 @@ function ResultsPage(): JSX.Element {
                   <p dangerouslySetInnerHTML={{ __html: result.Summary }}></p>
                   <button
                     rel="nofollow"
-                    onClick={() => handleReadMore(result.ID)}
+                    onClick={() => handleReadMore(result)}
                   >
                     Read More
                   </button>
@@ -231,7 +214,7 @@ function ResultsPage(): JSX.Element {
                       rel="nofollow"
                       onClick={() => {
                         feedbackSent
-                          ? setFeedbackModalOpen(true)
+                          ? handleRecommendationReadMore()
                           : alert(
                               "Please provide feedback before Reading this recommended page!"
                             );
@@ -256,15 +239,6 @@ function ResultsPage(): JSX.Element {
           </Grid>
         </Grid>
       </div>
-      {/* Render the FeedbackModal */}
-      <FeedbackModal
-        open={isFeedbackModalOpen}
-        onClose={() => setFeedbackModalOpen(false)} // Close the modal
-        onRecommendationFeedbackSubmit={(feedback) => {
-          setFeedbackValue(feedback); // Update the feedback value
-          handleFeedbackSubmit(feedback); // Submit feedback and navigate
-        }}
-      />
     </div>
   );
 }
