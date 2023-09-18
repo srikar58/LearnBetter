@@ -153,9 +153,5 @@ def fetch_results(search_term):
 
     result = ResultsModels.DataDocument.objects(__raw__=query).first()
     return result
-
-def generateFakeRecommendation(search_term, data_document, knowledge_level, topic):
-    data_document = ResultsModels.DataDocument.objects(Topic=topic).first()
-    recommendation = save_recommendation_to_db(search_term, data_document, knowledge_level)
     
     

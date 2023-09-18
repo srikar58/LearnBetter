@@ -31,6 +31,7 @@ def UpdateRecommendationFeedback(user_name, recommendation, recommendation_feedb
 
         print("recommendation_feedback:------", recommendation_feedback)
         recommendation_obj.UserAgreement["recommendation_feedback"] = recommendation_feedback
+        recommendation_obj.UserAgreement["accessed"] = "yes"
 
         print(recommendation_obj.id)
 
