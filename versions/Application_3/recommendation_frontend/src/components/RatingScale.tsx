@@ -152,7 +152,7 @@ function RatingScale({ recommendationObj, onFeedbackSent }: RatingScaleProps) {
         </div>
       ) : (
         <Typography align="center" fontWeight="bold">
-          Thank you for providing Feedback for this Item!
+          The System will use this information to improve the system in the future!
         </Typography>
       )}
     </div>
