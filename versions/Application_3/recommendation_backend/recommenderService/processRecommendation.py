@@ -85,6 +85,7 @@ def process_recommendation(user_name, search_term):
             else:
                 recommendation = save_recommendation_to_db(search_term, data_document, knowledge_level)
             matched_activity.ActiveRecommendation = recommendation
+            matched_activity.RecommendationsMade =  matched_activity.RecommendationsMade+1
             user_document.RecommendationsFeed.append(recommendation)
             user_document.save()
             print("-------------------New Recommendation-------------------")
