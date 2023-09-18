@@ -39,12 +39,16 @@ def process_recommendation(user_name, search_term):
             print("-------------------Duplicate Recommendation-----------------")
             return {"document": data_document.to_mongo().to_dict(),
                     "recommendation_obj": matching_activity[0].ActiveRecommendation.to_mongo().to_dict(), "Status": True}
+        elif matching_activity[0] is not None:
+            matching_activity[0].SearchTerms.append(search_term)
+            user_document.save()
+            matching_activities.append(matching_activity[0])
 
     matching_activities.sort(key=lambda x: len(x.PagesAccessed), reverse=True)
 
     data_document = None
     matched_activity = None
-    for activity in matching_activities:
+    for activity in matching_activities:    
         categories = next_level(activity.Level, 0)
         # print(activity.Topic, categories[0], categories[1])
         data_document = ResultsModels.DataDocument.objects(
@@ -65,16 +69,22 @@ def process_recommendation(user_name, search_term):
     # process_knowledge_level(matched_activity)
     # reccomendation = Recommendations(SearchTerm, )
     if matched_activity is not None and data_document is not None:
-
+        if(matched_activity.RecommendationsMade == 3 and matched_activity.ActiveRecommendation.UserAgreement["accessed"] == "no"):
+            data_document = ResultsModels.DataDocument.objects(Topic=matched_activity.Topic).first()
         if matched_activity.ActiveRecommendation is not None and matched_activity.ActiveRecommendation.Recommendation == data_document:
             print("-------------------Duplicate Recommendation-----------------")
             return {"document": data_document.to_mongo().to_dict(),
                     "recommendation_obj": matched_activity.ActiveRecommendation.to_mongo().to_dict(), "Status": True}
         else:
             knowledge_level = process_knowledge_level(matched_activity)
-            recommendation = save_recommendation_to_db(
-                search_term, data_document, knowledge_level)
+            if(matched_activity.RecommendationsMade == 2):
+                data_document = ResultsModels.DataDocument.objects(Topic=matched_activity.Topic).first()
+                recommendation = save_recommendation_to_db(search_term, data_document, knowledge_level)
+                matched_activity.FakeRecommendation = recommendation
+            else:
+                recommendation = save_recommendation_to_db(search_term, data_document, knowledge_level)
             matched_activity.ActiveRecommendation = recommendation
+            matched_activity.RecommendationsMade =  matched_activity.RecommendationsMade+1
             user_document.RecommendationsFeed.append(recommendation)
             user_document.save()
             print("-------------------New Recommendation-------------------")
@@ -82,12 +92,6 @@ def process_recommendation(user_name, search_term):
                     "recommendation_obj": recommendation.to_mongo().to_dict(), "Status": True}
     else:
         return {"Status": False}
-
-    print({"document": data_document.to_mongo().to_dict(),
-           "recommendation_obj": recommendation.to_mongo().to_dict()})
-
-    # return {"document": data_document.to_mongo().to_dict(),
-    #         "recommendation_obj": recommendation.to_mongo().to_dict()}
 
 
 def next_level(level, step):
@@ -107,7 +111,8 @@ def save_new_user_to_db(username, search_term, recommendation, level, data_docum
         Topic=data_document.Topic,
         SearchTerms=[search_term],
         Level=level,
-        ActiveRecommendation=recommendation
+        ActiveRecommendation=recommendation,
+        RecommendationsMade=1
     )
     user = User.objects(UserName=username).first()
     user.RecommendationsFeed.append(recommendation)
@@ -119,9 +124,9 @@ def save_recommendation_to_db(search_term, data_document, knowledge_level):
     est_offset = timedelta(hours=-4)
     recommendation = Recommendations(
         SearchTerm=search_term, Recommendation=data_document, PredictedKnowledge=knowledge_level, TimeStamp=datetime.now(timezone(est_offset)))
-
-    recommendation.save()
-    return recommendation
+    recommendation.UserAgreement["accessed"] = "no"
+    # recommendation.save()
+    return recommendation.save()
 
 
 def process_knowledge_level(activity):
@@ -135,27 +140,22 @@ def process_knowledge_level(activity):
           "-----------------------------------")
     pages = len(unique_levels)
     print("No of unique pages accessed in this topic is ", pages)
-    # if pages == 0:
-    #     return 0
-    # elif pages == 1:
-    #     return 1
-    # elif pages == 2:
-    #     return 3
-    # elif pages > 2 and pages < total_pages:
-    #     return 4
-    # else:
-    #     return 5
     return pages
-    # print("No of unique pages accessed in this topic is ", pages)
 
 
 def fetch_results(search_term):
     search_word_array = search_term.lower().split()  # Convert search terms to array
     print(search_word_array)
 
-    query = {'$or': [{'Keywords.' + key: {'$exists': True}} for key in search_word_array],
+    query = {'$and': [{'Keywords.' + key: {'$exists': True}} for key in search_word_array],
              'Category_A': 'Level 1',
              'Category_B': 1}
 
     result = ResultsModels.DataDocument.objects(__raw__=query).first()
     return result
+
+def generateFakeRecommendation(search_term, data_document, knowledge_level, topic):
+    data_document = ResultsModels.DataDocument.objects(Topic=topic).first()
+    recommendation = save_recommendation_to_db(search_term, data_document, knowledge_level)
+    
+    
