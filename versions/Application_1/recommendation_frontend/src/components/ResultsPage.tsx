@@ -104,9 +104,8 @@ function ResultsPage(): JSX.Element {
     }
   };
 
-  const handleReadMore = async (resultID: number) => {
+  const process_activity = async (resultID: number) => {
     const headers = { Username: String(username) };
-    try {
       const formData = new FormData();
 
       formData.append("search_term", String(searchTerm));
@@ -123,9 +122,28 @@ function ResultsPage(): JSX.Element {
 
       const json_response = await response.json();
       console.log(json_response);
-      navigate("/search/" + searchTerm + "/page/" + resultID);
-    } catch (error) {
+      navigate("/search/" + searchTerm + "/page/" + resultID, {state: {"recommendation_obj":recommendation}});
+    
+  };
+
+  const handleReadMore = async (result: SearchResult) => {
+    try{
+      process_activity(result.ID)
+      navigate("/search/" + searchTerm + "/page/" + result.ID, {state: {"document":result, "isRecommendation": false}});
+    }
+    catch (error) {
       console.error("An error occurred:", error);
+      return error;
+    }
+  };
+
+  const handleRecommendationReadMore = async () => {
+    const headers = { Username: String(username) };
+    try {
+      process_activity(recommendation.document.ID);
+      navigate("/search/" + searchTerm + "/page/" + recommendation.document.ID, {state: {"document":recommendation.document, "recommendation_obj": recommendation.recommendation_obj, "isRecommendation": true}});
+    } catch (e) {
+      console.log("Some error");
     }
   };
 
@@ -156,7 +174,7 @@ function ResultsPage(): JSX.Element {
                   <p dangerouslySetInnerHTML={{ __html: result.Summary }}></p>
                   <button
                     rel="nofollow"
-                    onClick={() => handleReadMore(result.ID)}
+                    onClick={() => handleReadMore(result)}
                   >
                     Read More
                   </button>
@@ -189,7 +207,7 @@ function ResultsPage(): JSX.Element {
                     ></p>
                     <button
                       rel="nofollow"
-                      onClick={() => handleReadMore(recommendation.document.ID)}
+                      onClick={() => handleRecommendationReadMore()}
                     >
                       Read More
                     </button>

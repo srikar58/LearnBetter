@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useLocation, useNavigate } from "react-router-dom";
 import { Typography, Button, Paper } from "@mui/material";
 import User from "./User";
+import FeedbackModal from "./FeedbackModal";
 
 const styles = {
   backButton: {
@@ -18,6 +19,14 @@ interface SearchResult {
   ID: number;
 }
 
+interface RecommendationObj {
+  _id: {
+    $oid: string
+  },
+  SearchTerm: string,
+  PredictedKnowledge: number,
+}
+
 function PageOverview(): JSX.Element {
   // const { resultId } = useParams<{ resultId: string }>();
   const [result, setResult] = useState<SearchResult>({
@@ -29,33 +38,83 @@ function PageOverview(): JSX.Element {
     ID: 0,
   });
 
+  const location = useLocation();
+  // console.log(location.state.recommendation_obj)
+
   // const [searchTerm, setSearchTerm] = useState<String>(props.searchTerm);
   const { pageID } = useParams<{ pageID: string }>();
   const { term } = useParams<{ term: string }>();
-  const [resultFound, setResultFound] = useState<boolean>();
+  const [username, setUsername] = useState<string | null>(
+    localStorage.getItem("username")
+  );
+
+  const [feedbackValue, setFeedbackValue] = useState<number>(-1);
+  const [isRecommendation, setIsRecommendation] = useState<boolean>(false);
+  const [isFeedbackModalOpen, setFeedbackModalOpen] = useState(false);
+  const [recommendationObj, setRecommendationObj] = useState<RecommendationObj>()
+  const [feedbackSubmitted, setFeedbackSubmitted] = useState<boolean>(false);
+  const navigate= useNavigate();
 
   useEffect(() => {
     // Fetch result details based on resultId
-    const fetchResultDetails = async () => {
-      try {
-        // Replace with your API endpoint to fetch result details by ID
-        const response = await fetch(
-          `http://127.0.0.1:8003/get_page/?pageID=${pageID}`
-        );
+    setUsername(localStorage.getItem("username"));
+    setResult(location.state.document)
+    setIsRecommendation(location.state.isRecommendation)
+    console.log(location.state.recommendation_obj)
+    if(isRecommendation){
+      setRecommendationObj(location.state.recommendation_obj)
+      console.log("-----------", recommendationObj)
+    }
+  }, [result]);
 
-        if (!response.ok) {
-          throw new Error("Failed to fetch result details");
-        }
+  const handleFeedbackSubmit = async (feedback: number) => {
 
-        const resultData: SearchResult = await response.json();
-        setResult(resultData);
-      } catch (error) {
-        console.error("An error occurred:", error);
+    console.log("Feedback submitted:", feedback);
+    setFeedbackSubmitted(false);
+    const headers = { Username: String(username) };
+    try {
+      const formData = new FormData();
+
+      formData.append("recommendation", JSON.stringify(recommendationObj));
+      formData.append("recommendation_feedback", String(feedback));
+      const response = await fetch("http://127.0.0.1:8003/update_recommendation_feedback/", {
+        method: "POST",
+        body: formData,
+        headers,
+      });
+
+      if (!response.ok) {
+        throw Error(response.statusText);
       }
-    };
 
-    fetchResultDetails();
-  }, [pageID]);
+      const json_response = await response.json();
+
+      console.log(json_response);
+      if (json_response.Status === "Success") {
+        setFeedbackSubmitted(true);
+        navigate("/results/"+term);
+      }
+      else{
+        setFeedbackSubmitted(false);
+      }
+    } catch (e) {
+      console.log("Some error");
+    }
+
+    // navigate("/your-desired-page"); 
+  };
+
+  const handleBackToResults = ()=>{
+    console.log("Back to Results clicked")
+    if(isRecommendation){
+      console.log("Is this even running")
+      setFeedbackModalOpen(true);
+    }
+    else{
+      navigate("/results/"+term);
+    }
+  }
+
 
   return (
     <div>
@@ -65,21 +124,20 @@ function PageOverview(): JSX.Element {
           <p className="subtopic">{result.SubTopic}</p>
           {/* <p>{result.Summary}</p> */}
           <p dangerouslySetInnerHTML={{ __html: result.Content }}></p>
-          {/* <a
-            href={result.Link}
-            target="_blank"
-            rel="nofollow"
-            // onClick={() => handleReadMore(result.ID)}
-          >
-            Read More
-          </a> */}
         </div>
-        <Link to={`/results/${term}`}>
-          <Button variant="outlined" style={styles.backButton}>
-            Back to Results
-          </Button>
-        </Link>
+        <Button variant="outlined" style={styles.backButton} onClick={handleBackToResults}>
+          Back to Results
+        </Button>
       </div>
+      {/* Render the FeedbackModal */}
+      <FeedbackModal
+        open={isFeedbackModalOpen}
+        onClose={() => setFeedbackModalOpen(false)} // Close the modal
+        onRecommendationFeedbackSubmit={(feedback) => {
+          setFeedbackValue(feedback); // Update the feedback value
+          handleFeedbackSubmit(feedback); // Submit feedback and navigate
+        }}
+      />
     </div>
   );
 }

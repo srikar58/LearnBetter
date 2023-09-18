@@ -153,7 +153,7 @@ def fetch_results(search_term):
     search_word_array = search_term.lower().split()  # Convert search terms to array
     print(search_word_array)
 
-    query = {'$or': [{'Keywords.' + key: {'$exists': True}} for key in search_word_array],
+    query = {'$and': [{'Keywords.' + key: {'$exists': True}} for key in search_word_array],
              'Category_A': 'Level 1',
              'Category_B': 1}
 
