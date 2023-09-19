@@ -43,6 +43,9 @@ def process_activity(user_name, search_term, page_accessed):
     if existing_activity.Level is None or current_level_val > existing_level_val:
         existing_activity.Level = current_level
 
+    if existing_activity.ActiveRecommendation.Recommendation == page_document:
+        existing_activity.RecommendationsViewed =  existing_activity.RecommendationsViewed+1
+
     try:
         id = existing_user_document.save()
     except mongoengine.ValidationError as e:

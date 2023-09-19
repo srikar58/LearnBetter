@@ -69,7 +69,7 @@ def process_recommendation(user_name, search_term):
     # process_knowledge_level(matched_activity)
     # reccomendation = Recommendations(SearchTerm, )
     if matched_activity is not None and data_document is not None:
-        if(matched_activity.RecommendationsMade == 3 and matched_activity.ActiveRecommendation.UserAgreement["accessed"] == "no"):
+        if(matched_activity.RecommendationsViewed == 3):
             data_document = ResultsModels.DataDocument.objects(Topic=matched_activity.Topic).first()
 
         if matched_activity.ActiveRecommendation is not None and matched_activity.ActiveRecommendation.Recommendation == data_document:
@@ -78,7 +78,7 @@ def process_recommendation(user_name, search_term):
                     "recommendation_obj": matched_activity.ActiveRecommendation.to_mongo().to_dict(), "Status": True}
         else:
             knowledge_level = process_knowledge_level(matched_activity)
-            if(matched_activity.RecommendationsMade == 2):
+            if(matched_activity.RecommendationsViewed == 3):
                 data_document = ResultsModels.DataDocument.objects(Topic=matched_activity.Topic).first()
                 recommendation = save_recommendation_to_db(search_term, data_document, knowledge_level)
                 matched_activity.FakeRecommendation = recommendation
@@ -114,7 +114,8 @@ def save_new_user_to_db(username, search_term, recommendation, level, data_docum
         SearchTerms=[search_term],
         Level=level,
         ActiveRecommendation=recommendation,
-        RecommendationsMade=1
+        RecommendationsMade=1,
+        RecommendationsViewed=0
     )
     user = User.objects(UserName=username).first()
     user.RecommendationsFeed.append(recommendation)

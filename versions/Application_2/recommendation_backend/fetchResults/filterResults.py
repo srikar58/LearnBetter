@@ -37,7 +37,7 @@ def process_filter(search_word):
         score = calculate_score(doc, search_word_array)
         ranked_results.append((doc, score))
 
-    ranked_results.sort(key=lambda x: x[1], reverse=True)  # Sort by score in descending order
+    # ranked_results.sort(key=lambda x: x[1], reverse=True)  # Sort by score in descending order
 
     for result, score in ranked_results:
         print(f"Document ID: {result.ID} - Match Score: {score}")
