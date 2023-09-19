@@ -77,7 +77,7 @@ def process_recommendation(user_name, search_term):
                     "recommendation_obj": matched_activity.ActiveRecommendation.to_mongo().to_dict(), "Status": True}
         else:
             knowledge_level = process_knowledge_level(matched_activity)
-            if(matched_activity.RecommendationsViewed == 2):
+            if(matched_activity.RecommendationsViewed == 3):
                 data_document = ResultsModels.DataDocument.objects(Topic=matched_activity.Topic).first()
                 recommendation = save_recommendation_to_db(search_term, data_document, knowledge_level)
                 matched_activity.FakeRecommendation = recommendation
