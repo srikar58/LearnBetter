@@ -17,7 +17,9 @@ interface RatingScaleProps {
 function RatingScale({ recommendationObj, onFeedbackSent }: RatingScaleProps) {
   const [ratings, setRatings] = useState(recommendationObj.PredictedKnowledge);
 
-  const [updatedRating, setUpdatedRating] = useState<number>(recommendationObj.PredictedKnowledge);
+  const [updatedRating, setUpdatedRating] = useState<number>(
+    recommendationObj.PredictedKnowledge
+  );
   const [ratingFeedback, setRatingFeedback] = useState<string>("yes");
 
   const username = localStorage.getItem("username");
@@ -29,15 +31,18 @@ function RatingScale({ recommendationObj, onFeedbackSent }: RatingScaleProps) {
 
   const [feedbackSent, setFeedbackSent] = useState(false);
 
+  const [sendFeedbackDisabled, setSendFeedbackdisabled] =
+    useState<boolean>(true);
+
   useEffect(() => {
     setRatings(recommendationObj.PredictedKnowledge);
     setUpdatedRating(recommendationObj.PredictedKnowledge);
     console.log(ratingFeedback);
   }, [recommendationObj]);
 
-
   const handleRatingChange = (newValue: number) => {
     if (typeof newValue === "number") {
+      setSendFeedbackdisabled(false);
       setUpdatedRating(newValue);
       setRatingFeedback(newValue === ratings ? "yes" : "no");
       // setRatings(newValue);
@@ -46,7 +51,7 @@ function RatingScale({ recommendationObj, onFeedbackSent }: RatingScaleProps) {
 
   const handleUpdate = async () => {
     const headers = { Username: String(username) };
-    console.log("rating feedback", ratingFeedback)
+    console.log("rating feedback", ratingFeedback);
 
     try {
       const formData = new FormData();
@@ -82,27 +87,27 @@ function RatingScale({ recommendationObj, onFeedbackSent }: RatingScaleProps) {
   const marks = [
     {
       value: 0,
-      label: '0',
+      label: "0",
     },
     {
       value: 1,
-      label: '1',
+      label: "1",
     },
     {
       value: 2,
-      label: '2',
+      label: "2",
     },
     {
       value: 3,
-      label: '3',
+      label: "3",
     },
     {
       value: 4,
-      label: '4',
+      label: "4",
     },
     {
       value: 5,
-      label: '5',
+      label: "5",
     },
   ];
 
@@ -116,8 +121,12 @@ function RatingScale({ recommendationObj, onFeedbackSent }: RatingScaleProps) {
             The recommendation above was given to you because the system
             determined that your level of understanding of the topic is:
           </Typography>
-          <div style={{ position: "relative", textAlign:"center" }}>
-            <CircularProgressBar selectedValue={ratings} maxValue={5} radius={50}/>
+          <div style={{ position: "relative", textAlign: "center" }}>
+            <CircularProgressBar
+              selectedValue={ratings}
+              maxValue={5}
+              radius={50}
+            />
           </div>
           <Box mt={1}>
             <Typography style={{ fontSize: "1rem" }}>
@@ -128,7 +137,9 @@ function RatingScale({ recommendationObj, onFeedbackSent }: RatingScaleProps) {
             <div style={{ position: "relative" }}>
               <Slider
                 value={updatedRating}
-                onChange={(e, newValue) => handleRatingChange(newValue as number)}
+                onChange={(e, newValue) =>
+                  handleRatingChange(newValue as number)
+                }
                 min={0}
                 max={5}
                 step={1}
@@ -136,8 +147,8 @@ function RatingScale({ recommendationObj, onFeedbackSent }: RatingScaleProps) {
               />
             </div>
             <div className="scaleValues">
-                  <span>Low</span>
-                  <span>High</span>
+              <span>Low</span>
+              <span>High</span>
             </div>
           </div>
           <Box mt={2}>
@@ -145,6 +156,7 @@ function RatingScale({ recommendationObj, onFeedbackSent }: RatingScaleProps) {
               variant="contained"
               color="primary"
               onClick={handleUpdate}
+              disabled={sendFeedbackDisabled}
             >
               Send Feedback
             </Button>
@@ -152,7 +164,8 @@ function RatingScale({ recommendationObj, onFeedbackSent }: RatingScaleProps) {
         </div>
       ) : (
         <Typography align="center" fontWeight="bold">
-          The System will use this information to improve the system in the future!
+          The System will use this information to improve the system in the
+          future!
         </Typography>
       )}
     </div>
