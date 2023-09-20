@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Typography, Slider, Button, Box } from "@mui/material";
 import { Radio, RadioGroup, FormControlLabel } from "@mui/material";
-
+import CircularProgressBar from "./ProgressBar";
 interface RecommendationObject {
   _id: {
     $oid: string;
