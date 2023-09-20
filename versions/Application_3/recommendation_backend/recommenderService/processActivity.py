@@ -45,7 +45,10 @@ def process_activity(user_name, search_term, page_accessed):
 
     if existing_activity.ActiveRecommendation.Recommendation == page_document:
         existing_activity.RecommendationsViewed =  existing_activity.RecommendationsViewed+1
-        
+        # recommendation = Recommendations.objects.get(existing_activity.ActiveRecommendation)
+        print("Recommendation ------------------ ", existing_activity.ActiveRecommendation.SearchTerm)
+        existing_activity.RecommendationsAccessed.append(existing_activity.ActiveRecommendation)
+
     try:
         id = existing_user_document.save()
     except mongoengine.ValidationError as e:
