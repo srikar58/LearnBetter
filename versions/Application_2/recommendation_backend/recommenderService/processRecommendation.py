@@ -70,7 +70,7 @@ def process_recommendation(user_name, search_term):
     # reccomendation = Recommendations(SearchTerm, )
     if matched_activity is not None and data_document is not None:
         if(matched_activity.RecommendationsViewed == 3):
-            data_document = ResultsModels.DataDocument.objects(Topic=matched_activity.Topic).first()
+            data_document = matched_activity.RecommendationsAccessed[0].Recommendation
 
         if matched_activity.ActiveRecommendation is not None and matched_activity.ActiveRecommendation.Recommendation == data_document:
             print("-------------------Duplicate Recommendation-----------------")
@@ -79,7 +79,7 @@ def process_recommendation(user_name, search_term):
         else:
             knowledge_level = process_knowledge_level(matched_activity)
             if(matched_activity.RecommendationsViewed == 3):
-                data_document = ResultsModels.DataDocument.objects(Topic=matched_activity.Topic).first()
+                data_document = matched_activity.RecommendationsAccessed[0].Recommendation
                 recommendation = save_recommendation_to_db(search_term, data_document, knowledge_level)
                 matched_activity.FakeRecommendation = recommendation
             else:
@@ -115,7 +115,8 @@ def save_new_user_to_db(username, search_term, recommendation, level, data_docum
         Level=level,
         ActiveRecommendation=recommendation,
         RecommendationsMade=1,
-        RecommendationsViewed=0
+        RecommendationsViewed=0,
+        RecommendationsAccessed=[]
     )
     user = User.objects(UserName=username).first()
     user.RecommendationsFeed.append(recommendation)
