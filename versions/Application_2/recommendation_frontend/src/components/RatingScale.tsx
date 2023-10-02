@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Typography, Slider, Button, Box } from "@mui/material";
 import { Radio, RadioGroup, FormControlLabel } from "@mui/material";
 import CircularProgressBar from "./ProgressBar";
+import ViewRecommendationModal from "./ViewRecommendationModal";
 interface RecommendationObject {
   _id: {
     $oid: string;
@@ -24,8 +25,13 @@ function RatingScale({ recommendationObj, onFeedbackSent }: RatingScaleProps) {
 
   const username = localStorage.getItem("username");
 
-  const [feedbackButtonDisabled, setFeedbackButtonDisabled] =
-    useState<boolean>(true);
+  const [feedbackButtonDisabled, setFeedbackButtonDisabled] = useState<boolean>(true);
+
+  const [recommendationViewFeedback, setRecommendationViewFeedback] = useState<String>("");
+
+  const [feedbackSubmitted, setFeedbackSubmitted] = useState<boolean>(false);
+
+  const [isRecommendationViewsModalOpen, setIsRecommendationViewsModalOpen] = useState<boolean>(false);
   console.log(recommendationObj);
   console.log(recommendationObj.PredictedKnowledge);
 
@@ -47,6 +53,41 @@ function RatingScale({ recommendationObj, onFeedbackSent }: RatingScaleProps) {
   ) => {
     setScaleDisable(event.target.value === "yes");
     setRatingFeedback(event.target.value);
+  };
+
+  const handleRecommendationviewFeedbackSubmit = async (feedback: String) => {
+
+    console.log("Feedback submitted:", feedback);
+    setFeedbackSubmitted(false);
+    const headers = { Username: String(username) };
+    try {
+      const formData = new FormData();
+
+      formData.append("recommendation", JSON.stringify(recommendationObj));
+      formData.append("recommendation_feedback", String(feedback));
+      const response = await fetch("http://127.0.0.1:8002/update_recommendation_view_feedback/", {
+        method: "POST",
+        body: formData,
+        headers,
+      });
+
+      if (!response.ok) {
+        throw Error(response.statusText);
+      }
+
+      const json_response = await response.json();
+
+      console.log(json_response);
+      if (json_response.Status === "Success") {
+        setFeedbackSubmitted(true);
+        setIsRecommendationViewsModalOpen(false);
+      }
+      else{
+        setFeedbackSubmitted(false);
+      }
+    } catch (e) {
+      console.log("Some error");
+    }
   };
 
   const handleRatingChange = (newValue: number) => {
@@ -85,6 +126,8 @@ function RatingScale({ recommendationObj, onFeedbackSent }: RatingScaleProps) {
     } catch (e) {
       console.log("Some error");
     }
+
+    setIsRecommendationViewsModalOpen(true);
 
     console.log("Ratings:", ratings);
   };
@@ -178,10 +221,19 @@ function RatingScale({ recommendationObj, onFeedbackSent }: RatingScaleProps) {
           </Box>
         </div>
       ) : (
-        <Typography align="center" fontWeight="bold">
-          The System will use this information to improve the system in the
-          future!
-        </Typography>
+        <div>
+          <ViewRecommendationModal
+          open={isRecommendationViewsModalOpen}
+          onClose={() => setIsRecommendationViewsModalOpen(false)} // Close the modal
+          onRecommendationFeedbackSubmit={(feedback) => {
+            setRecommendationViewFeedback(feedback); // Update the feedback value
+            handleRecommendationviewFeedbackSubmit(feedback); // Submit feedback and navigate
+          }}
+          />
+          <Typography align="center" fontWeight="bold">
+            The System will use this information to improve the system in the future!
+          </Typography>
+        </div>
       )}
     </div>
   );

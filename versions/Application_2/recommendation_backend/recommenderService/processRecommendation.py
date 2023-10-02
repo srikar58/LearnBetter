@@ -69,8 +69,8 @@ def process_recommendation(user_name, search_term):
     # process_knowledge_level(matched_activity)
     # reccomendation = Recommendations(SearchTerm, )
     if matched_activity is not None and data_document is not None:
-        if(matched_activity.RecommendationsViewed == 3):
-            data_document = matched_activity.RecommendationsAccessed[0].Recommendation
+        if(matched_activity.RecommendationsViewed == 3 or matched_activity.RecommendationsViewed==7):
+            data_document = generate_wrong_recommendation(matched_activity)
 
         if matched_activity.ActiveRecommendation is not None and matched_activity.ActiveRecommendation.Recommendation == data_document:
             print("-------------------Duplicate Recommendation-----------------")
@@ -78,10 +78,10 @@ def process_recommendation(user_name, search_term):
                     "recommendation_obj": matched_activity.ActiveRecommendation.to_mongo().to_dict(), "Status": True}
         else:
             knowledge_level = process_knowledge_level(matched_activity)
-            if(matched_activity.RecommendationsViewed == 3):
-                data_document = matched_activity.RecommendationsAccessed[0].Recommendation
+            if(matched_activity.RecommendationsViewed == 3 or matched_activity.RecommendationsViewed==7):
+                data_document = generate_wrong_recommendation(matched_activity)
                 recommendation = save_recommendation_to_db(search_term, data_document, knowledge_level)
-                matched_activity.FakeRecommendation = recommendation
+                matched_activity.FakeRecommendations.append(recommendation)
             else:
                 recommendation = save_recommendation_to_db(search_term, data_document, knowledge_level)
             matched_activity.ActiveRecommendation = recommendation
@@ -116,13 +116,24 @@ def save_new_user_to_db(username, search_term, recommendation, level, data_docum
         ActiveRecommendation=recommendation,
         RecommendationsMade=1,
         RecommendationsViewed=0,
-        RecommendationsAccessed=[]
+        RecommendationsAccessed=[],
+        FakeRecommendations = []
     )
     user = User.objects(UserName=username).first()
     user.RecommendationsFeed.append(recommendation)
     user.Activity.append(activity)
     user.save()
 
+def generate_wrong_recommendation(matched_activity):
+    fake_recommendation_number = len(matched_activity.FakeRecommendations)
+    if(fake_recommendation_number==0 or matched_activity.FakeRecommendations[0]==matched_activity.ActiveRecommendation):
+        data_document = ResultsModels.DataDocument.objects(
+        Topic=matched_activity.Topic, Category_A="Level 0", Category_B=1).first()
+    else:
+        data_document = ResultsModels.DataDocument.objects(
+        Topic=matched_activity.Topic, Category_A="Level 0", Category_B=2).first()
+    print(data_document.Content)
+    return data_document
 
 def save_recommendation_to_db(search_term, data_document, knowledge_level):
     est_offset = timedelta(hours=-4)
