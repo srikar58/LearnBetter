@@ -150,7 +150,7 @@ def process_knowledge_level(activity):
     total_pages = ResultsModels.DataDocument.objects(
         Topic=activity.Topic).count()
     for page in activity.PagesAccessed:
-        if(page.Category_A is not "Level 0"):
+        if(page.Category_A != "Level 0"):
             unique_levels.add(page.Category_A)
     print("------------------------", unique_levels,
           "-----------------------------------")

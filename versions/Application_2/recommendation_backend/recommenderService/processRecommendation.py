@@ -80,7 +80,7 @@ def process_recommendation(user_name, search_term):
             knowledge_level = process_knowledge_level(matched_activity)
             if(matched_activity.RecommendationsViewed == 3 or matched_activity.RecommendationsViewed==7):
                 data_document = generate_wrong_recommendation(matched_activity)
-                recommendation = save_recommendation_to_db(search_term, data_document, knowledge_level)
+                recommendation = save_recommendation_to_db(search_term, data_document, 1)
                 matched_activity.FakeRecommendations.append(recommendation)
             else:
                 recommendation = save_recommendation_to_db(search_term, data_document, knowledge_level)
@@ -150,7 +150,8 @@ def process_knowledge_level(activity):
     total_pages = ResultsModels.DataDocument.objects(
         Topic=activity.Topic).count()
     for page in activity.PagesAccessed:
-        unique_levels.add(page.Category_A)
+        if(page.Category_A != "Level 0"):
+            unique_levels.add(page.Category_A)
     print("------------------------", unique_levels,
           "-----------------------------------")
     pages = len(unique_levels)
