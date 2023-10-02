@@ -34,4 +34,7 @@ urlpatterns = [
          name='update_feedback'),
     path('update_recommendation_feedback/', recommender_viewes.update_recommendation_feedback_api,
          name='update_recommendation_feedback'),
+     path('update_recommendation_view_feedback/', recommender_viewes.update_recommendation_view_feedback_api,
+         name='update_recommendation_view_feedback'),
+
 ]

@@ -48,7 +48,7 @@ function PageOverview(): JSX.Element {
     localStorage.getItem("username")
   );
 
-  const [feedbackValue, setFeedbackValue] = useState<number>(-1);
+  // const [feedbackValue, setFeedbackValue] = useState<String>("");
   const [isRecommendation, setIsRecommendation] = useState<boolean>(false);
   const [isFeedbackModalOpen, setFeedbackModalOpen] = useState(false);
   const [recommendationObj, setRecommendationObj] = useState<RecommendationObj>()
@@ -67,9 +67,9 @@ function PageOverview(): JSX.Element {
     }
   }, [result]);
 
-  const handleFeedbackSubmit = async (feedback: number) => {
+  const handleFeedbackSubmit = async (feedback: String, willingFeedback: String) => {
 
-    console.log("Feedback submitted:", feedback);
+    console.log("Feedback submitted:", willingFeedback);
     setFeedbackSubmitted(false);
     const headers = { Username: String(username) };
     try {
@@ -77,6 +77,7 @@ function PageOverview(): JSX.Element {
 
       formData.append("recommendation", JSON.stringify(recommendationObj));
       formData.append("recommendation_feedback", String(feedback));
+      formData.append("willingness_feedback", String(willingFeedback));
       const response = await fetch("http://127.0.0.1:8003/update_recommendation_feedback/", {
         method: "POST",
         body: formData,
@@ -133,9 +134,9 @@ function PageOverview(): JSX.Element {
       <FeedbackModal
         open={isFeedbackModalOpen}
         onClose={() => setFeedbackModalOpen(false)} // Close the modal
-        onRecommendationFeedbackSubmit={(feedback) => {
-          setFeedbackValue(feedback); // Update the feedback value
-          handleFeedbackSubmit(feedback); // Submit feedback and navigate
+        onFeedbackSubmit={(recommendationFeedback, willingFeedback) => {
+          // setFeedbackValue(feedback); // Update the feedback value
+          handleFeedbackSubmit(recommendationFeedback, willingFeedback); // Submit feedback and navigate
         }}
       />
     </div>
