@@ -3,7 +3,7 @@ import { useParams } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
 import Grid from "@mui/material/Grid";
 import User from "./User";
-
+import ViewRecommendationModal from "./ViewRecommendationModal";
 interface SearchResult {
   Topic: string;
   Summary: string;
@@ -60,6 +60,12 @@ function ResultsPage(): JSX.Element {
   const [username, setUsername] = useState<string | null>(
     localStorage.getItem("username")
   );
+
+  const [recommendationViewFeedback, setRecommendationViewFeedback] = useState<String>("");
+
+  const [isRecommendationViewsModalOpen, setIsRecommendationViewsModalOpen] = useState<boolean>(false);
+
+  const [feedbackSubmitted, setFeedbackSubmitted] = useState<boolean>(false);
 
   useEffect(() => {
     const fetchResults = async () => {
@@ -126,9 +132,42 @@ function ResultsPage(): JSX.Element {
     
   };
 
+  const handleRecommendationviewFeedbackSubmit = async (feedback: String) => {
+
+    console.log("Feedback submitted:", feedback);
+    const headers = { Username: String(username) };
+    try {
+      const formData = new FormData();
+
+      formData.append("recommendation", JSON.stringify(recommendation.recommendation_obj));
+      formData.append("recommendation_feedback", String(feedback));
+      const response = await fetch("http://127.0.0.1:8001/update_recommendation_view_feedback/", {
+        method: "POST",
+        body: formData,
+        headers,
+      });
+
+      if (!response.ok) {
+        throw Error(response.statusText);
+      }
+
+      const json_response = await response.json();
+
+      console.log(json_response);
+      if (json_response.Status === "Success") {
+        setIsRecommendationViewsModalOpen(false);
+        setFeedbackSubmitted(true);
+        process_activity(recommendation.document.ID);
+        navigate("/search/" + searchTerm + "/page/" + recommendation.document.ID, {state: {"document":recommendation.document, "recommendation_obj": recommendation.recommendation_obj, "isRecommendation": true}});
+      }
+    } catch (e) {
+      console.log("Some error");
+    }
+  };
+
   const handleReadMore = async (result: SearchResult) => {
     try{
-      process_activity(result.ID)
+      process_activity(result.ID);
       navigate("/search/" + searchTerm + "/page/" + result.ID, {state: {"document":result, "isRecommendation": false}});
     }
     catch (error) {
@@ -140,9 +179,12 @@ function ResultsPage(): JSX.Element {
   const handleRecommendationReadMore = async () => {
     const headers = { Username: String(username) };
     try {
-      process_activity(recommendation.document.ID);
-      navigate("/search/" + searchTerm + "/page/" + recommendation.document.ID, {state: {"document":recommendation.document, "recommendation_obj": recommendation.recommendation_obj, "isRecommendation": true}});
-    } catch (e) {
+      setIsRecommendationViewsModalOpen(true);
+      // if(feedbackSubmitted){
+      //   process_activity(recommendation.document.ID);
+      //   navigate("/search/" + searchTerm + "/page/" + recommendation.document.ID, {state: {"document":recommendation.document, "recommendation_obj": recommendation.recommendation_obj, "isRecommendation": true}});
+      // }
+      } catch (e) {
       console.log("Some error");
     }
   };
@@ -212,6 +254,16 @@ function ResultsPage(): JSX.Element {
                       Read More
                     </button>
                   </div>
+                </div>
+                <div>
+                  <ViewRecommendationModal
+                    open={isRecommendationViewsModalOpen}
+                    onClose={() => setIsRecommendationViewsModalOpen(false)} // Close the modal
+                    onRecommendationFeedbackSubmit={(feedback) => {
+                      setRecommendationViewFeedback(feedback); // Update the feedback value
+                      handleRecommendationviewFeedbackSubmit(feedback); // Submit feedback and navigate
+                    }}
+                  />
                 </div>
               </div>
             ) : (

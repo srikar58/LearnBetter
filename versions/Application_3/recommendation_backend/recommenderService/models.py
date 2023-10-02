@@ -23,7 +23,7 @@ class UserActivity(mongoengine.EmbeddedDocument):
     Level = mongoengine.StringField()
     ActiveRecommendation = mongoengine.ReferenceField(Recommendations)
     RecommendationsMade = mongoengine.IntField()
-    FakeRecommendation = mongoengine.ReferenceField(Recommendations)
+    FakeRecommendations = mongoengine.ListField(mongoengine.ReferenceField(Recommendations))
     RecommendationsViewed = mongoengine.IntField()
     RecommendationsAccessed = mongoengine.ListField(mongoengine.ReferenceField(Recommendations))
 

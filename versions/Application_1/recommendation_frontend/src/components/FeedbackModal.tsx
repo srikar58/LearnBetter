@@ -6,52 +6,45 @@ import Modal from "@mui/material/Modal";
 import Container from "@mui/material/Container";
 import CssBaseline from "@mui/material/CssBaseline";
 import { useState } from "react";
-import { Slider } from "@mui/material";
+import { Radio, RadioGroup, FormControlLabel } from "@mui/material";
 const style = {
   position: "absolute" as "absolute",
   top: "50%",
   left: "50%",
   transform: "translate(-50%, -50%)",
-  width: 400,
+  width: 600,
   bgcolor: "background.paper",
   boxShadow: 24,
   p: 4,
 };
 
+
 interface RecommendationFeedbackModalProps {
     open: boolean;
     onClose: () => void;
-    onRecommendationFeedbackSubmit: (feedback: number) => void;
+    onFeedbackSubmit: (recommendationfeedback: String, willingFeedback: String) => void;
   }
 
-export default function FeedbackModal({open,onClose,onRecommendationFeedbackSubmit}: RecommendationFeedbackModalProps): JSX.Element {
-    const [recommendationFeedback, setRecommendationFeedback] = useState<number>(0);
+export default function FeedbackModal({open,onClose,onFeedbackSubmit}: RecommendationFeedbackModalProps): JSX.Element {
+    const [recommendationFeedback, setRecommendationFeedback] = useState<String>("");
+    const [willingFeedback, setWillingFeedback] = useState<String>("");
     const handleSubmit = () => {
-        onRecommendationFeedbackSubmit(recommendationFeedback);
+        onFeedbackSubmit(recommendationFeedback, willingFeedback);
       };
 
-const marks = [
-  {
-    value: 1,
-    label: '1',
-  },
-  {
-    value: 2,
-    label: '2',
-  },
-  {
-    value: 3,
-    label: '3',
-  },
-  {
-    value: 4,
-    label: '4',
-  },
-  {
-    value: 5,
-    label: '5',
-  },
-];
+    const handleWillingFeedbackChange = (
+      event: React.ChangeEvent<HTMLInputElement>
+      ) => {
+        setWillingFeedback(event.target.value);
+      };
+
+    const handleRelevanceFeedbackchange = (
+      event: React.ChangeEvent<HTMLInputElement>
+    ) => {
+      setRecommendationFeedback(event.target.value);
+    }
+
+
   return (
     <div className="overlay hidden">
       <Modal
@@ -70,23 +63,89 @@ const marks = [
                 alignItems: "center",
               }}
             >
-              <Typography component="h1" variant="h6">
-                Recommendation Quality
+              <Typography component="h1" variant="h5">
+                Feedback
               </Typography>
-              <Typography component="h2" textAlign={"center"}> The Recommended item was relevant.</Typography>
-            <div style={{ position: "relative",width:"80%" }}>
-                <Slider
+              <Typography component="h2" textAlign={"left"}> How relevant do you find the information on this page?</Typography>
+              <div style={{ position: "relative",width:"100%" }}>
+                <RadioGroup
+                name="relevanceFeedback"
                 value={recommendationFeedback}
-                onChange={(e, newValue) => setRecommendationFeedback(newValue as number)}
-                marks={marks}
-                min={1}
-                max={5}
-                step={1}
-                />
-                <div className="scaleValues">
-                <span>Disagree</span>
-                <span>Agree</span>
-                </div>
+                onChange={handleRelevanceFeedbackchange}
+                // Use 'row' to display radio buttons horizontally
+                >
+                  <FormControlLabel
+                    value="irrelevant"
+                    control={<Radio />}
+                    label="Irrelevant"
+                    labelPlacement="end" // Adjust label placement as needed
+                  />
+                  <FormControlLabel
+                    value="somewhat  irrelevant"
+                    control={<Radio />}
+                    label="Somewhat  irrelevant"
+                    labelPlacement="end" // Adjust label placement as needed
+                  />
+                  <FormControlLabel
+                    value="neither irrelevant nor relevant"
+                    control={<Radio />}
+                    label="Neither irrelevant nor relevant"
+                    labelPlacement="end" // Adjust label placement as needed
+                  />
+                  <FormControlLabel
+                    value="somewhat relevant"
+                    control={<Radio />}
+                    label="Somewhat relevant"
+                    labelPlacement="end" // Adjust label placement as needed
+                  />
+                  <FormControlLabel
+                    value="relevant"
+                    control={<Radio />}
+                    label="Relevant"
+                    labelPlacement="end" // Adjust label placement as needed
+                  />
+                </RadioGroup>
+              </div>
+              <Typography component="h2" textAlign={"left"}> How willing are you to view the next recommendation from the system?</Typography>
+            <div style={{ position: "relative",width:"100%" }}>
+            <RadioGroup
+              name="willingFeedback"
+              value={willingFeedback}
+              onChange={handleWillingFeedbackChange}
+               // Use 'row' to display radio buttons horizontally
+            >
+              <FormControlLabel
+                value="not willing"
+                control={<Radio />}
+                label="Not willing"
+                labelPlacement="end" // Adjust label placement as needed
+              />
+              <FormControlLabel
+                value="not really willing"
+                control={<Radio />}
+                label="Not really willing"
+                labelPlacement="end" // Adjust label placement as needed
+              />
+              <FormControlLabel
+                value="undecided"
+                control={<Radio />}
+                label="Undecided"
+                labelPlacement="end" // Adjust label placement as needed
+              />
+              <FormControlLabel
+                value="somewhat willing"
+                control={<Radio />}
+                label="Somewhat willing"
+                labelPlacement="end" // Adjust label placement as needed
+              />
+              <FormControlLabel
+                value="willing"
+                control={<Radio />}
+                label="Willing"
+                labelPlacement="end" // Adjust label placement as needed
+              />
+            </RadioGroup>
+
             </div>
             <Button
                 type="submit"
@@ -94,7 +153,7 @@ const marks = [
                 variant="contained"
                 sx={{ mt: 3, mb: 2 }}
                 onClick={handleSubmit}
-                disabled={recommendationFeedback===0}
+                disabled={recommendationFeedback==="" || willingFeedback===""}
             >
                 Submit
             </Button>

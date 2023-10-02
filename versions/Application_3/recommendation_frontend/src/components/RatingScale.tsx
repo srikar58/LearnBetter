@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
-import { Typography, Slider, Button, Box } from "@mui/material";
+import { Typography, Slider, Button, Box, Radio, FormControlLabel, RadioGroup } from "@mui/material";
 import CircularProgressBar from "./ProgressBar";
+import ViewRecommendationModal from "./ViewRecommendationModal";
 interface RecommendationObject {
   _id: {
     $oid: string;
@@ -18,7 +19,7 @@ function RatingScale({ recommendationObj, onFeedbackSent }: RatingScaleProps) {
   const [ratings, setRatings] = useState(recommendationObj.PredictedKnowledge);
 
   const [updatedRating, setUpdatedRating] = useState<number>(recommendationObj.PredictedKnowledge);
-  const [ratingFeedback, setRatingFeedback] = useState<string>("yes");
+  const [ratingFeedback, setRatingFeedback] = useState<string>("");
 
   const username = localStorage.getItem("username");
 
@@ -28,6 +29,14 @@ function RatingScale({ recommendationObj, onFeedbackSent }: RatingScaleProps) {
   const [feedbackTabEnable, setFeedbackTabEnable] = useState<boolean>(true);
 
   const [feedbackSent, setFeedbackSent] = useState(false);
+
+  const [feedbackbutttonDisabled, setFeedbackButtonDisabled] = useState<boolean>(true);
+
+  const [recommendationViewFeedback, setRecommendationViewFeedback] = useState<String>("");
+
+  const [feedbackSubmitted, setFeedbackSubmitted] = useState<boolean>(false);
+
+  const [isRecommendationViewsModalOpen, setIsRecommendationViewsModalOpen] = useState<boolean>(false);
 
   useEffect(() => {
     setRatings(recommendationObj.PredictedKnowledge);
@@ -40,8 +49,51 @@ function RatingScale({ recommendationObj, onFeedbackSent }: RatingScaleProps) {
     if (typeof newValue === "number") {
       setUpdatedRating(newValue);
       setRatingFeedback(newValue === ratings ? "yes" : "no");
+      setFeedbackButtonDisabled(false);
       // setRatings(newValue);
     }
+  };
+
+  const handleRecommendationviewFeedbackSubmit = async (feedback: String) => {
+
+    console.log("Feedback submitted:", feedback);
+    setFeedbackSubmitted(false);
+    const headers = { Username: String(username) };
+    try {
+      const formData = new FormData();
+
+      formData.append("recommendation", JSON.stringify(recommendationObj));
+      formData.append("recommendation_feedback", String(feedback));
+      const response = await fetch("http://127.0.0.1:8003/update_recommendation_view_feedback/", {
+        method: "POST",
+        body: formData,
+        headers,
+      });
+
+      if (!response.ok) {
+        throw Error(response.statusText);
+      }
+
+      const json_response = await response.json();
+
+      console.log(json_response);
+      if (json_response.Status === "Success") {
+        setFeedbackSubmitted(true);
+        setIsRecommendationViewsModalOpen(false);
+      }
+      else{
+        setFeedbackSubmitted(false);
+      }
+    } catch (e) {
+      console.log("Some error");
+    }
+  };
+
+  const handleRatingFeedbackChange = (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    setRatingFeedback(event.target.value);
+    setFeedbackButtonDisabled(false);
   };
 
   const handleUpdate = async () => {
@@ -76,6 +128,7 @@ function RatingScale({ recommendationObj, onFeedbackSent }: RatingScaleProps) {
       console.log("Some error");
     }
 
+    setIsRecommendationViewsModalOpen(true);
     console.log("Ratings:", ratings);
   };
 
@@ -140,20 +193,46 @@ function RatingScale({ recommendationObj, onFeedbackSent }: RatingScaleProps) {
                   <span>High</span>
             </div>
           </div>
+          <div>
+            <RadioGroup
+              name="ratingFeedback"
+              value={ratingFeedback}
+              onChange={handleRatingFeedbackChange}
+              row // Use 'row' to display radio buttons horizontally
+            >
+              <FormControlLabel
+                value="yes"
+                control={<Radio />}
+                label="Yes"
+                labelPlacement="end" // Adjust label placement as needed
+              />
+            </RadioGroup>
+          </div>
           <Box mt={2}>
             <Button
               variant="contained"
               color="primary"
               onClick={handleUpdate}
+              disabled={feedbackbutttonDisabled}
             >
               Send Feedback
             </Button>
           </Box>
         </div>
       ) : (
-        <Typography align="center" fontWeight="bold">
-          The System will use this information to improve the system in the future!
-        </Typography>
+        <div>
+          <ViewRecommendationModal
+          open={isRecommendationViewsModalOpen}
+          onClose={() => setIsRecommendationViewsModalOpen(false)} // Close the modal
+          onRecommendationFeedbackSubmit={(feedback) => {
+            setRecommendationViewFeedback(feedback); // Update the feedback value
+            handleRecommendationviewFeedbackSubmit(feedback); // Submit feedback and navigate
+          }}
+          />
+          <Typography align="center" fontWeight="bold">
+            The System will use this information to improve the system in the future!
+          </Typography>
+        </div>
       )}
     </div>
   );
